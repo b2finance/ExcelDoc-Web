@@ -1,4 +1,5 @@
 using ExcelDoc.Server.DTOs.Auth;
+using ExcelDoc.Server.Services;
 using ExcelDoc.Server.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -58,6 +59,13 @@ public sealed class AuthController : ControllerBase
     {
         return exception switch
         {
+            LicenseValidationException license => StatusCode(
+                license.Unavailable ? StatusCodes.Status503ServiceUnavailable : StatusCodes.Status403Forbidden,
+                new ProblemDetails
+                {
+                    Detail = license.Message,
+                    Status = license.Unavailable ? StatusCodes.Status503ServiceUnavailable : StatusCodes.Status403Forbidden
+                }),
             UnauthorizedAccessException => Unauthorized(
                 new ProblemDetails
                 {

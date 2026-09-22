@@ -99,3 +99,30 @@ O publish executa `npm ci`, compila o Angular em modo de produção e copia o bu
 O servidor IIS precisa apenas do Hosting Bundle do .NET 10; Node.js não é necessário no servidor de produção.
 
 Consulte o [runbook de SAP e IIS](ExcelDoc/docs/SAP-IIS-RUNBOOK.md) para instalação, permissões, TLS, reciclagem e smoke tests.
+
+## Validação de licença
+
+Cada login consulta o DevHub antes de inicializar a base ou emitir o JWT.
+O número de instalação é obtido da sessão SAP do próprio usuário. O parceiro e sua
+licença são consultados em `BusinessPartners/installation-number/{numero}` e
+`licenses/search`, com o ProductId **7**. Somente licença ativa e não vencida libera
+acesso, inclusive para administradores. Parceiro/licença ausente resulta em HTTP
+403; falhas na consulta resultam em HTTP 503 e bloqueiam o login. A sessão SAP é
+encerrada quando o login é recusado. A mensagem aparece na tela de login.
+
+Configure a seção `Licensing` no servidor:
+
+```json
+{
+  "Licensing": {
+    "BaseUrl": "https://devhub.b2finance.com/",
+    "ProductId": "7"
+  }
+}
+```
+
+A URL deve usar HTTPS; cada chamada HTTP tem timeout de 30 segundos. Somente o token da API é
+armazenado em memória, com renovação antecipada e uma nova tentativa em caso de
+HTTP 401. Nenhuma decisão de licença é reutilizada entre logins. Datas de validade
+são comparadas como instantes (UTC); datas sem offset seguem o fuso do servidor.
+A validação se aplica a novos logins; não revoga JWTs já emitidos.

@@ -101,6 +101,23 @@ public sealed class SapServiceLayerClient : ISapServiceLayerClient, IDisposable
         }
     }
 
+    public async Task<string> GetInstallationNumberAsync(
+        SapSessionContext session,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var number = await session.GetRequiredConnection()
+            .Request("LicenseService_GetInstallationNumber")
+            .WithTimeout(session.RequestTimeoutSeconds)
+            .PostReceiveStringAsync();
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return !string.IsNullOrWhiteSpace(number)
+            ? number.Trim()
+            : throw new InvalidOperationException("Número de instalação SAP ausente.");
+    }
+
     public async Task LogoutAsync(
         SapSessionContext session,
         CancellationToken cancellationToken = default)

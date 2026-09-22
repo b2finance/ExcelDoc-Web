@@ -58,7 +58,28 @@ public sealed class AuthServiceAuthorizationTests
         Assert.Null(fixture.Initializer.AllowSchemaCreation);
     }
 
-    private static TestFixture CreateFixture()
+    [Theory]
+    [InlineData("manager")]
+    [InlineData("operador")]
+    public async Task LoginAsync_RejectsLicenseBeforeInitializationAndClosesSap(string userName)
+    {
+        var fixture = CreateFixture(rejectLicense: true);
+        await Assert.ThrowsAsync<LicenseValidationException>(() => fixture.Service.LoginAsync(new LoginRequestDto
+        {
+            Database = "SBODEMO_BR", Login = userName, Senha = "secret"
+        }));
+        Assert.Null(fixture.Initializer.AllowSchemaCreation);
+        Assert.Null(fixture.Accessor.SessionKey);
+        Assert.False(fixture.Store.TryGet(fixture.Client.Session.SessionKey, out _));
+        Assert.Equal(1, fixture.Client.LogoutCalls);
+    }
+
+    private sealed class TestLicenseService(bool reject) : ILicenseService
+    {
+        public Task ValidateAsync(SapSessionContext session, CancellationToken cancellationToken = default) =>
+            reject ? Task.FromException(new LicenseValidationException("Licença não encontrada.")) : Task.CompletedTask;
+    }
+    private static TestFixture CreateFixture(bool rejectLicense = false)
     {
         var initializer = new RecordingDatabaseInitializer();
         var client = new RecordingSapServiceLayerClient();
@@ -94,16 +115,16 @@ public sealed class AuthServiceAuthorizationTests
             client,
             accessor,
             store,
-            clock);
+            clock, new TestLicenseService(rejectLicense));
 
-        return new TestFixture(service, initializer, client, accessor);
+        return new TestFixture(service, initializer, client, accessor, store);
     }
 
     private sealed record TestFixture(
         AuthService Service,
         RecordingDatabaseInitializer Initializer,
         RecordingSapServiceLayerClient Client,
-        RecordingSessionAccessor Accessor);
+        RecordingSessionAccessor Accessor, SapSessionStore Store);
 
     private sealed class RecordingDatabaseInitializer : ISapDatabaseInitializer
     {
@@ -121,6 +142,10 @@ public sealed class AuthServiceAuthorizationTests
 
     private sealed class RecordingSapServiceLayerClient : ISapServiceLayerClient
     {
+        public int LogoutCalls { get; private set; }
+
+        public Task<string> GetInstallationNumberAsync(SapSessionContext session, CancellationToken cancellationToken = default) => Task.FromResult("installation");
+
         public int LoginCalls { get; private set; }
 
         public string? Database { get; private set; }
@@ -151,6 +176,7 @@ public sealed class AuthServiceAuthorizationTests
             SapSessionContext session,
             CancellationToken cancellationToken = default)
         {
+            LogoutCalls++;
             return Task.CompletedTask;
         }
 

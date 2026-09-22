@@ -29,6 +29,7 @@ public sealed class AuthService : IAuthService
     private readonly ISapSessionContextAccessor _sessionAccessor;
     private readonly ISapSessionStore _sessionStore;
     private readonly ISystemClock _systemClock;
+    private readonly ILicenseService _licenseService;
 
     public AuthService(
         ISapDatabaseInitializer databaseInitializer,
@@ -38,7 +39,8 @@ public sealed class AuthService : IAuthService
         ISapServiceLayerClient sapServiceLayerClient,
         ISapSessionContextAccessor sessionAccessor,
         ISapSessionStore sessionStore,
-        ISystemClock systemClock)
+        ISystemClock systemClock,
+        ILicenseService licenseService)
     {
         _databaseInitializer = databaseInitializer;
         _jwtOptions = jwtOptions.Value;
@@ -48,6 +50,7 @@ public sealed class AuthService : IAuthService
         _sessionAccessor = sessionAccessor;
         _sessionStore = sessionStore;
         _systemClock = systemClock;
+        _licenseService = licenseService;
     }
 
     public IReadOnlyCollection<SapBaseDto> GetBases()
@@ -92,11 +95,12 @@ public sealed class AuthService : IAuthService
             request.Senha,
             cancellationToken);
 
-        _sessionStore.Add(session);
-        _sessionAccessor.SetSessionKey(session.SessionKey);
-
         try
         {
+            await _licenseService.ValidateAsync(session, cancellationToken);
+            _sessionStore.Add(session);
+            _sessionAccessor.SetSessionKey(session.SessionKey);
+
             await _databaseInitializer.InitializeAsync(
                 session,
                 isAdministrator,
@@ -113,7 +117,7 @@ public sealed class AuthService : IAuthService
             {
                 _logger.LogDebug(
                     logoutException,
-                    "Falha ao encerrar sessão SAP após erro de inicialização.");
+                    "Falha ao encerrar sessão SAP após login recusado.");
             }
 
             throw;

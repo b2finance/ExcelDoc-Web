@@ -20,19 +20,20 @@ if (jwtValidation.Failed)
         string.Join(Environment.NewLine, jwtValidation.Failures));
 }
 
-builder.Services.Configure<ProcessingOptions>(
-    builder.Configuration.GetSection(ProcessingOptions.SectionName));
-builder.Services.Configure<StorageOptions>(
-    builder.Configuration.GetSection(StorageOptions.SectionName));
+builder.Services.Configure<ProcessingOptions>(builder.Configuration.GetSection(ProcessingOptions.SectionName));
+builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection(StorageOptions.SectionName));
 builder.Services
     .AddOptions<JwtOptions>()
     .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
     .ValidateOnStart();
+
 builder.Services.AddSingleton<IValidateOptions<JwtOptions>, JwtOptionsValidator>();
+
 builder.Services
     .AddOptions<SapServiceLayerOptions>()
     .Bind(builder.Configuration.GetSection(SapServiceLayerOptions.SectionName))
     .ValidateOnStart();
+
 builder.Services.AddSingleton<
     IValidateOptions<SapServiceLayerOptions>,
     SapServiceLayerOptionsValidator>();
@@ -68,6 +69,19 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddInfrastructureRepositories();
+builder.Services.AddOptions<LicenseOptions>().Bind(builder.Configuration.GetSection(LicenseOptions.SectionName));
+
+builder.Services.AddHttpClient(ExcelDoc.Server.Services.LicenseService.ClientName, (provider, client) =>
+{
+    var options = provider.GetRequiredService<IOptions<LicenseOptions>>().Value;
+    if (!Uri.TryCreate(options.BaseUrl, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
+        throw new InvalidOperationException("Licensing: BaseUrl deve ser uma URL HTTPS.");
+
+    client.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(30);
+}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+
+builder.Services.AddSingleton<ExcelDoc.Server.Services.Interfaces.ILicenseService, ExcelDoc.Server.Services.LicenseService>();
 
 builder.Services
     .AddControllers()
