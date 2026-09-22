@@ -10,6 +10,8 @@ public sealed class SapServiceLayerOptions
     public string BaseUrl { get; set; } = string.Empty;
 
     public int RequestTimeoutSeconds { get; set; } = 100;
+    
+    public int Language { get; set; }
 
     public List<SapBaseOptions> Bases { get; set; } = [];
 }

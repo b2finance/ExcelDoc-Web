@@ -59,7 +59,7 @@ public sealed class SapServiceLayerClient : ISapServiceLayerClient, IDisposable
             database,
             userName,
             password,
-            PortugueseLanguageCode);
+            _sapOptions.Language);
 
         try
         {
