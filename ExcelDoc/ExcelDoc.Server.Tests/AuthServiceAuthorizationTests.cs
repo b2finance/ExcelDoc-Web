@@ -76,6 +76,7 @@ public sealed class AuthServiceAuthorizationTests
 
     private sealed class TestLicenseService(bool reject) : ILicenseService
     {
+        public Task LogRequestAsync(SapSessionContext session, string message, CancellationToken cancellationToken = default) => Task.CompletedTask;
         public Task ValidateAsync(SapSessionContext session, CancellationToken cancellationToken = default) =>
             reject ? Task.FromException(new LicenseValidationException("Licença não encontrada.")) : Task.CompletedTask;
     }

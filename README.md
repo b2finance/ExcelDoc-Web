@@ -126,3 +126,19 @@ armazenado em memória, com renovação antecipada e uma nova tentativa em caso 
 HTTP 401. Nenhuma decisão de licença é reutilizada entre logins. Datas de validade
 são comparadas como instantes (UTC); datas sem offset seguem o fuso do servidor.
 A validação se aplica a novos logins; não revoga JWTs já emitidos.
+
+## Métricas de documentos processados
+
+Após a inserção no SAP e a gravação do resultado de sucesso, cada documento gera
+um `POST /logs` autenticado no DevHub. O corpo inclui mensagem, data UTC, nível
+`Trace` (0), parceiro e serial da licença validada no login. O parceiro e o serial
+pertencem à sessão SAP e não são compartilhados entre clientes. A mensagem contém
+base, processamento, IdExcel e identificador único; não envia o conteúdo
+da planilha nem o payload do documento.
+
+Erros de validação, falhas de inserção e documentos ignorados por duplicidade não
+geram logs externos. Falhas no envio da métrica são registradas apenas localmente:
+o documento mantém seu sucesso e o lote continua. Não há reenvio automático nem
+fila durável de métricas; indisponibilidade do DevHub pode resultar em perda da
+métrica. O POST não é repetido após falha para evitar duplicação quando a resposta
+se perde. O token da API usa a mesma renovação por expiração do licenciamento.

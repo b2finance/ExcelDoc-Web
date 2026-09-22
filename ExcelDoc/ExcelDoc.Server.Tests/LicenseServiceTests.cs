@@ -10,9 +10,9 @@ namespace ExcelDoc.Server.Tests;
 public sealed class LicenseServiceTests
 {
     [Theory]
-    [InlineData("{\"active\":true,\"dueDate\":\"2099-01-01T00:00:00Z\"}", true)]
-    [InlineData("{\"active\":false,\"dueDate\":\"2099-01-01T00:00:00Z\"}", false)]
-    [InlineData("{\"active\":true,\"dueDate\":\"2000-01-01T00:00:00Z\"}", false)]
+    [InlineData("{\"serial\":\"license-42\",\"active\":true,\"dueDate\":\"2099-01-01T00:00:00Z\"}", true)]
+    [InlineData("{\"serial\":\"license-42\",\"active\":false,\"dueDate\":\"2099-01-01T00:00:00Z\"}", false)]
+    [InlineData("{\"serial\":\"license-42\",\"active\":true,\"dueDate\":\"2000-01-01T00:00:00Z\"}", false)]
     [InlineData("null", false)]
     [InlineData("{}", false)]
     public async Task ValidatesActiveAndUnexpiredLicense(string body, bool allowed)
@@ -90,6 +90,61 @@ public sealed class LicenseServiceTests
         Assert.True(error.Unavailable);
         Assert.Equal(0, handler.Logins);
     }
+    [Fact]
+    public async Task LogsUseValidatedSessionAndIncludeTrace()
+    {
+        using var handler = new ApiHandler();
+        using var service = CreateService(handler);
+        var first = new SapSessionContext();
+        await service.ValidateAsync(first);
+        handler.LicenseBody = "{\"serial\":\"second-license\",\"active\":true,\"dueDate\":\"2099-01-01T00:00:00Z\"}";
+        handler.PartnerBody = "{\"partnerId\":99,\"hardwareKey\":\"other-key\"}";
+        var second = new SapSessionContext();
+        await service.ValidateAsync(second);
+        await service.LogRequestAsync(first, "Documento inserido.");
+        await service.LogRequestAsync(second, "Outro documento.");
+        using var log = System.Text.Json.JsonDocument.Parse(handler.Logs[0]);
+        Assert.Equal(42, log.RootElement.GetProperty("partnerId").GetInt32());
+        Assert.Equal("license-42", log.RootElement.GetProperty("digitalServicesLicenseLicenseSerial").GetString());
+        Assert.Equal(0, log.RootElement.GetProperty("logLevel").GetInt32());
+        Assert.Equal("Documento inserido.", log.RootElement.GetProperty("mensagem").GetString());
+        Assert.Equal(new Clock().UtcNow, log.RootElement.GetProperty("dataLog").GetDateTime());
+        using var other = System.Text.Json.JsonDocument.Parse(handler.Logs[1]);
+        Assert.Equal(99, other.RootElement.GetProperty("partnerId").GetInt32());
+        Assert.Equal("second-license", other.RootElement.GetProperty("digitalServicesLicenseLicenseSerial").GetString());
+        Assert.Equal(1, handler.Logins);
+    }
+
+    [Fact]
+    public async Task CannotLogWithoutValidatedSession()
+    {
+        using var handler = new ApiHandler();
+        using var service = CreateService(handler);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.LogRequestAsync(new SapSessionContext(), "message"));
+        Assert.Empty(handler.Logs);
+        Assert.Equal(0, handler.Logins);
+    }
+
+    [Fact]
+    public async Task FailedLogIsNotRetried()
+    {
+        using var handler = new ApiHandler { LogStatus = HttpStatusCode.InternalServerError };
+        using var service = CreateService(handler);
+        var session = new SapSessionContext();
+        await service.ValidateAsync(session);
+        await Assert.ThrowsAsync<HttpRequestException>(() => service.LogRequestAsync(session, "message"));
+        Assert.Single(handler.Logs);
+    }
+
+    [Fact]
+    public async Task MissingSerialCannotEstablishLicenseContext()
+    {
+        using var handler = new ApiHandler { LicenseBody = "{\"active\":true,\"dueDate\":\"2099-01-01T00:00:00Z\"}" };
+        using var service = CreateService(handler);
+        var session = new SapSessionContext();
+        await Assert.ThrowsAsync<LicenseValidationException>(() => service.ValidateAsync(session));
+        Assert.Null(session.License);
+    }
     private static LicenseService CreateService(ApiHandler handler) => new(
         new ClientFactory(handler),
         Microsoft.Extensions.Options.Options.Create(new LicenseOptions { ProductId = "7", UserName = "test", Password = "test" }),
@@ -108,8 +163,11 @@ public sealed class LicenseServiceTests
     private sealed class ApiHandler : HttpMessageHandler
     {
         public string LoginBody = "{\"token\":{\"token\":\"token\",\"expiration\":\"2099-01-01T00:00:00Z\"}}";
-        public string LicenseBody = "{\"active\":true,\"dueDate\":\"2099-01-01T00:00:00Z\"}";
+        public string LicenseBody = "{\"serial\":\"license-42\",\"active\":true,\"dueDate\":\"2099-01-01T00:00:00Z\"}";
+        public string PartnerBody = "{\"partnerId\":42,\"hardwareKey\":\"key&value\"}";
         public HttpStatusCode PartnerStatus = HttpStatusCode.OK;
+        public List<string> Logs { get; } = [];
+        public HttpStatusCode LogStatus = HttpStatusCode.Created;
         public int Logins;
         public int Searches;
         public string? LastSearch;
@@ -129,8 +187,14 @@ public sealed class LicenseServiceTests
                 RejectTokenOnce = false;
                 return Reply(HttpStatusCode.Unauthorized, "{}");
             }
+            if (path == "/logs")
+            {
+                Assert.Equal(HttpMethod.Post, request.Method);
+                Logs.Add(request.Content!.ReadAsStringAsync(cancellationToken).GetAwaiter().GetResult());
+                return Reply(LogStatus, "{}");
+            }
             if (path.StartsWith("/BusinessPartners/"))
-                return Reply(PartnerStatus, "{\"partnerId\":42,\"hardwareKey\":\"key&value\"}");
+                return Reply(PartnerStatus, PartnerBody);
             Interlocked.Increment(ref Searches);
             LastSearch = request.RequestUri.Query;
             return Reply(HttpStatusCode.OK, LicenseBody);

@@ -22,6 +22,8 @@ public sealed class LicenseService(
 
     public async Task ValidateAsync(SapSessionContext session, CancellationToken cancellationToken = default)
     {
+        session.License = null;
+
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -57,6 +59,11 @@ public sealed class LicenseService(
 
             if (!license.Active || license.DueDate < new DateTimeOffset(clock.UtcNow))
                 throw new LicenseValidationException("A licença não está ativa ou está expirada. Entre em contato com o suporte.");
+
+            if (string.IsNullOrWhiteSpace(license.Serial))
+                throw new JsonException("Serial de licença ausente.");
+            
+            session.License = new SapLicenseContext(partner.PartnerId, license.Serial);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { throw; }
         catch (LicenseValidationException)
@@ -69,6 +76,33 @@ public sealed class LicenseService(
             throw new LicenseValidationException(
                 "Não foi possível validar a licença no momento. Tente novamente ou entre em contato com o suporte.", true);
         }
+    }
+
+    public async Task LogRequestAsync(
+        SapSessionContext session,
+        string message,
+        CancellationToken cancellationToken = default)
+    {
+        var license = session.License;
+        if (license is null || license.PartnerId <= 0 || string.IsNullOrWhiteSpace(license.LicenseSerial))
+            throw new InvalidOperationException("Valide a licença da sessão antes de enviar logs.");
+
+        using var client = httpClientFactory.CreateClient(ClientName);
+        var token = await GetTokenAsync(client, cancellationToken);
+        using var request = new HttpRequestMessage(HttpMethod.Post, "logs");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        
+        request.Content = JsonContent.Create(new
+        {
+            Mensagem = message,
+            DataLog = clock.UtcNow,
+            LogLevel = LogLevel.Trace,
+            DigitalServicesLicenseLicenseSerial = license.LicenseSerial,
+            license.PartnerId
+        });
+        
+        using var response = await client.SendAsync(request, cancellationToken);
+        response.EnsureSuccessStatusCode();
     }
 
     private static LicenseValidationException NotFound() =>
@@ -139,7 +173,7 @@ public sealed class LicenseService(
     }
 
     private sealed record BusinessPartner(int PartnerId, string HardwareKey);
-    private sealed record ProductLicense(bool Active, DateTimeOffset DueDate);
+    private sealed record ProductLicense(bool Active, DateTimeOffset DueDate, string? Serial);
     private sealed record LoginResponse(ApiToken? Token);
     private sealed record ApiToken(string Token, DateTimeOffset Expiration);
 

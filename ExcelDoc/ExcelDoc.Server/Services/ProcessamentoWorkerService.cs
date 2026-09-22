@@ -25,6 +25,7 @@ namespace ExcelDoc.Server.Services
         private readonly ISapSessionContextAccessor _sapSessionContextAccessor;
         private readonly ISapServiceLayerClient _sapServiceLayerClient;
         private readonly ISystemClock _systemClock;
+        private readonly ILicenseService _licenseService;
         private readonly ILogger<ProcessamentoWorkerService> _logger;
 
         public ProcessamentoWorkerService(
@@ -37,7 +38,8 @@ namespace ExcelDoc.Server.Services
             ISapSessionContextAccessor sapSessionContextAccessor,
             ISapServiceLayerClient sapServiceLayerClient,
             ISystemClock systemClock,
-            ILogger<ProcessamentoWorkerService> logger)
+            ILogger<ProcessamentoWorkerService> logger,
+            ILicenseService licenseService)
         {
             _excelReaderService = excelReaderService;
             _jsonBuilderService = jsonBuilderService;
@@ -49,6 +51,7 @@ namespace ExcelDoc.Server.Services
             _sapServiceLayerClient = sapServiceLayerClient;
             _systemClock = systemClock;
             _logger = logger;
+            _licenseService = licenseService;
         }
 
         public async Task ProcessAsync(Background.ProcessamentoQueueItem item, CancellationToken cancellationToken = default)
@@ -167,6 +170,25 @@ namespace ExcelDoc.Server.Services
                 itemLog.DataFinalizacao = _systemClock.UtcNow;
                 await _processamentoRepository.AddItemAsync(itemLog, cancellationToken);
                 await _processamentoRepository.SaveChangesAsync(cancellationToken);
+
+                if (itemLog.Status == StatusProcessamentoItem.Sucesso)
+                {
+                    try
+                    {
+                        await _licenseService.LogRequestAsync(
+                            sapSession,
+                            $"Documento inserido com sucesso no SAP. Base={sapSession.Database}; Processamento={processamento.Id}; IdExcel={group.IdExcel}; IdDocumentoUnico={itemLog.IdDocumentoUnico}.",
+                            cancellationToken);
+                    }
+                    catch (Exception exception)
+                    {
+                        // The document is already inserted and its success persisted. A metric
+                        // failure must not change its status or trigger another SAP insertion.
+                        _logger.LogWarning(
+                            "Falha ao enviar métrica do processamento {ProcessamentoId}, IdExcel {IdExcel} ({ExceptionType}).",
+                            processamento.Id, group.IdExcel, exception.GetType().Name);
+                    }
+                }
             }
 
             processamento.Status = processamento.TotalErro > 0 ? StatusProcessamento.Erro : StatusProcessamento.Sucesso;

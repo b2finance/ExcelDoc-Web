@@ -12,6 +12,8 @@ public sealed class SapSessionContext
 
     public string UserName { get; init; } = string.Empty;
 
+    public SapLicenseContext? License { get; internal set; }
+
     public SLConnection? Connection { get; init; }
 
     public int SessionTimeoutMinutes { get; init; } = 30;
