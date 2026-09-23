@@ -95,7 +95,8 @@ export class ProcessamentoDetalheComponent implements OnInit {
 
   verJson(item: ProcessamentoItem): void {
     this.dialog.open(JsonDialogComponent, {
-      width: '700px',
+      width: '860px',
+      maxWidth: 'calc(100vw - 32px)',
       data: {
         linhaExcel: item.linhaExcel,
         jsonEnviado: item.jsonEnviado,

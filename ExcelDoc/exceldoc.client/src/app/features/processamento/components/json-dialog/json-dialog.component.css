@@ -30,7 +30,7 @@ h2[mat-dialog-title] {
   }
 
 mat-dialog-content {
-  min-width: min(620px, 70vw);
+  min-width: 0;
 }
 
 h4 {
@@ -57,7 +57,7 @@ h4 {
   font-size: 0.78rem;
   line-height: 1.55;
   white-space: pre-wrap;
-  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 mat-dialog-actions {
@@ -70,9 +70,3 @@ mat-dialog-actions {
     border-radius: 9px;
     padding-inline: 20px;
   }
-
-@media (max-width: 700px) {
-  mat-dialog-content {
-    min-width: 0;
-  }
-}
