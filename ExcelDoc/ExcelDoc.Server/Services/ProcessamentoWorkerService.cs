@@ -249,8 +249,13 @@ namespace ExcelDoc.Server.Services
 
         private static string? GetExceptionData(Exception exception, string key)
         {
-            return exception.Data.Contains(key) ? exception.Data[key]?.ToString() : null;
-        }
+            var value = exception.Data.Contains(key)
+                ? exception.Data[key]?.ToString()
+                : null;
 
+            return string.IsNullOrWhiteSpace(value)
+                ? null
+                : value;
+        }
     }
 }
