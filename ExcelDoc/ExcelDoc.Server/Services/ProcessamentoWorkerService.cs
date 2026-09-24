@@ -98,6 +98,8 @@ namespace ExcelDoc.Server.Services
             processamento.Status = StatusProcessamento.Processando;
             await _processamentoRepository.SaveChangesAsync(cancellationToken);
 
+            IReadOnlyDictionary<string, int>? nfModels = null;
+
             foreach (var group in groups)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -140,6 +142,19 @@ namespace ExcelDoc.Server.Services
                     }
                     else
                     {
+                        if (payload.TryGetValue("SequenceModel", out var modelValue) && modelValue is not null)
+                        {
+                            var modelName = modelValue.ToString()?.Trim() ?? string.Empty;
+                            nfModels ??= await _sapServiceLayerClient.GetNFModelsAsync(sapSession, cancellationToken);
+                            if (!nfModels.TryGetValue(modelName, out var modelCode))
+                            {
+                                throw new InvalidOperationException($"Código do modelo '{modelName}' não encontrado. Verifique a planilha e tente novamente.");
+                            }
+
+                            payload["SequenceModel"] = modelCode;
+                            itemLog.JsonEnviado = JsonSerializer.Serialize(payload, JsonOptions);
+                        }
+
                         var responseJson = await _sapServiceLayerClient.PostProcessamentoAsync(
                             sapSession,
                             processamento.Documento.Endpoint,

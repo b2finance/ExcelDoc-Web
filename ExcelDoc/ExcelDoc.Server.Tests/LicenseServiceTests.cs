@@ -205,6 +205,7 @@ public sealed class LicenseServiceTests
 
     private sealed class SapClient : ISapServiceLayerClient
     {
+        public Task<IReadOnlyDictionary<string, int>> GetNFModelsAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<string> GetInstallationNumberAsync(SapSessionContext session, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();

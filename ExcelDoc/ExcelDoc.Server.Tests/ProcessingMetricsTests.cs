@@ -65,9 +65,36 @@ public sealed class ProcessingMetricsTests
         Assert.Equal(1, repo.Processing.TotalErro);
     }
 
+    [Fact]
+    public async Task SequenceModel_ResolvesOnceAndContinuesAfterUnknownName()
+    {
+        var repo = new Repository();
+        var sap = new SapClient
+        {
+            Models = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase) { ["Modelo 55"] = 55 }
+        };
+        var session = new SapSessionContext();
+        var metrics = new Metrics(repo, session);
+        var worker = CreateWorker(repo, sap, session, metrics, count: 3,
+            modelNames: ["Modelo 55", "Desconhecido", "modelo 55"]);
+
+        await worker.ProcessAsync(new ProcessamentoQueueItem { ProcessamentoId = 1 });
+
+        Assert.Equal(1, sap.ModelCalls);
+        Assert.Equal(2, sap.Calls);
+        Assert.Equal(2, repo.Processing.TotalSucesso);
+        Assert.Equal(1, repo.Processing.TotalErro);
+        Assert.Equal([StatusProcessamentoItem.Sucesso, StatusProcessamentoItem.Erro, StatusProcessamentoItem.Sucesso],
+            repo.Items.Select(item => item.Status));
+        Assert.Contains("Desconhecido", repo.Items[1].Mensagem);
+        Assert.All(sap.SentModels, code => Assert.Equal(55, code));
+        Assert.Contains("\"SequenceModel\":55", repo.Items[0].JsonEnviado);
+    }
+
     private static ProcessamentoWorkerService CreateWorker(Repository repo, SapClient sap,
-        SapSessionContext session, Metrics metrics, bool payloadFails = false, int count = 1) => new(
-        new Reader(count), new Builder(payloadFails), new StubMessageService(), new DocumentoUnicoService(),
+        SapSessionContext session, Metrics metrics, bool payloadFails = false, int count = 1,
+        string[]? modelNames = null) => new(
+        new Reader(count), new Builder(payloadFails, modelNames), new StubMessageService(), new DocumentoUnicoService(),
         new AgrupamentoService(new StubMessageService()), repo, new Accessor(session), sap,
         new Clock(), NullLogger<ProcessamentoWorkerService>.Instance, metrics);
 
@@ -89,10 +116,17 @@ public sealed class ProcessingMetricsTests
         }
     }
     private sealed class Clock : ISystemClock { public DateTime UtcNow => DateTime.UtcNow; }
-    private sealed class Builder(bool fail) : IJsonBuilderService
+    private sealed class Builder(bool fail, string[]? modelNames) : IJsonBuilderService
     {
         public IDictionary<string, object?> BuildDocumentPayload(PerfilMapeamento perfil, IReadOnlyList<ExcelRowData> groupRows) =>
-            fail ? throw new InvalidOperationException("invalid payload") : new Dictionary<string, object?> { ["Id"] = groupRows[0].RowNumber };
+            fail ? throw new InvalidOperationException("invalid payload") : Build(groupRows[0].RowNumber);
+
+        private IDictionary<string, object?> Build(int rowNumber)
+        {
+            var payload = new Dictionary<string, object?> { ["Id"] = rowNumber };
+            if (modelNames is not null) payload["SequenceModel"] = modelNames[rowNumber - 2];
+            return payload;
+        }
     }
     private sealed class Reader(int count) : IExcelReaderService
     {
@@ -113,12 +147,22 @@ public sealed class ProcessingMetricsTests
     }
     private sealed class SapClient : ISapServiceLayerClient
     {
+        public IReadOnlyDictionary<string, int> Models = new Dictionary<string, int>();
+        public int ModelCalls;
+        public List<int> SentModels { get; } = [];
+        public Task<IReadOnlyDictionary<string, int>> GetNFModelsAsync(SapSessionContext session, CancellationToken cancellationToken = default)
+        {
+            ModelCalls++;
+            return Task.FromResult(Models);
+        }
         public bool Fail;
         public bool FailSecond;
         public int Calls;
         public Task<string> PostProcessamentoAsync(SapSessionContext session, string endpoint, object payload, CancellationToken cancellationToken = default)
         {
             Calls++;
+            if (payload is IDictionary<string, object?> fields && fields.TryGetValue("SequenceModel", out var model))
+                SentModels.Add(Assert.IsType<int>(model));
             return Fail || (FailSecond && Calls == 2) ? Task.FromException<string>(new InvalidOperationException("SAP error")) : Task.FromResult("{\"DocEntry\":123}");
         }
         public Task<string> GetInstallationNumberAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();

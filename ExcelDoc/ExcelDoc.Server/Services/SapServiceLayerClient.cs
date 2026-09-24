@@ -1,4 +1,5 @@
 using System.Net;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
@@ -185,6 +186,123 @@ public sealed class SapServiceLayerClient : ISapServiceLayerClient, IDisposable
             translatedException.Data[ResponseBodyKey] = error.ResponseBody ?? string.Empty;
             throw translatedException;
         }
+    }
+
+    public async Task<IReadOnlyDictionary<string, int>> GetNFModelsAsync(
+        SapSessionContext session,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        var models = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var endpoint = "NFModels?$select=AbsEntry,NFMName";
+
+        while (endpoint is not null)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            using var lease = await _rateLimiter.AcquireAsync(1, cancellationToken);
+            if (!lease.IsAcquired)
+            {
+                throw new InvalidOperationException(_messageService.Get(MessageKeys.SapRequestReservationFailed));
+            }
+
+            string body;
+            try
+            {
+                body = await session.GetRequiredConnection()
+                    .Request(endpoint)
+                    .WithTimeout(session.RequestTimeoutSeconds)
+                    .GetStringAsync();
+                session.RenewExpiration();
+            }
+            catch (Exception exception) when (SapServiceLayerErrors.IsServiceLayerException(exception))
+            {
+                var error = await SapServiceLayerErrors.ReadAsync(exception);
+                SapServiceLayerErrors.UpdateSessionExpiration(session, error.StatusCode);
+                throw SapServiceLayerErrors.CreateException(error, exception,
+                    _messageService.Get(MessageKeys.SapServiceLayerOperationFailed),
+                    _messageService.Get(MessageKeys.SapSessionExpired));
+            }
+
+            using var document = JsonDocument.Parse(body);
+            var root = document.RootElement;
+            AddNFModels(root, models);
+            endpoint = GetNFModelsNextEndpoint(root, session);
+        }
+
+        return models;
+    }
+
+    internal static void AddNFModels(JsonElement root, IDictionary<string, int> models)
+    {
+        if (root.ValueKind != JsonValueKind.Object ||
+            !root.TryGetProperty("value", out var values) || values.ValueKind != JsonValueKind.Array)
+        {
+            throw new InvalidOperationException("Resposta de NFModels inválida: coleção ausente.");
+        }
+
+        foreach (var model in values.EnumerateArray())
+        {
+            if (model.ValueKind != JsonValueKind.Object ||
+                !model.TryGetProperty("NFMName", out var nameElement) ||
+                nameElement.ValueKind == JsonValueKind.Null)
+            {
+                continue;
+            }
+
+            if (nameElement.ValueKind != JsonValueKind.String)
+            {
+                throw new InvalidOperationException("Resposta de NFModels contém nome de modelo inválido.");
+            }
+
+            var name = nameElement.GetString()?.Trim();
+            if (string.IsNullOrWhiteSpace(name)) continue;
+
+            if (!model.TryGetProperty("AbsEntry", out var codeElement) ||
+                !int.TryParse(codeElement.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var code))
+            {
+                throw new InvalidOperationException($"Resposta de NFModels contém código numérico inválido para o modelo '{name}'.");
+            }
+
+            if (!models.TryAdd(name, code) && models[name] != code)
+            {
+                throw new InvalidOperationException($"NFModels contém mais de um código para o modelo '{name}'.");
+            }
+        }
+    }
+
+    private static string? GetNFModelsNextEndpoint(JsonElement root, SapSessionContext session)
+    {
+        JsonElement nextLink = default;
+        if (!root.TryGetProperty("@odata.nextLink", out nextLink) &&
+            !root.TryGetProperty("odata.nextLink", out nextLink) &&
+            !root.TryGetProperty("nextLink", out nextLink))
+        {
+            return null;
+        }
+
+        var link = nextLink.GetString();
+        if (string.IsNullOrWhiteSpace(link)) return null;
+
+        var baseUri = new Uri(session.ServiceLayerBaseUrl.TrimEnd('/') + "/");
+        if (Uri.TryCreate(link, UriKind.Absolute, out var absolute))
+        {
+            if (absolute.Scheme != baseUri.Scheme || absolute.Host != baseUri.Host ||
+                absolute.Port != baseUri.Port || !absolute.AbsolutePath.StartsWith(baseUri.AbsolutePath, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Paginação de NFModels aponta para fora da Service Layer configurada.");
+            }
+
+            link = absolute.PathAndQuery[baseUri.AbsolutePath.Length..];
+        }
+        else
+        {
+            link = link.TrimStart('/');
+            var servicePath = baseUri.AbsolutePath.Trim('/');
+            if (link.StartsWith(servicePath + "/", StringComparison.OrdinalIgnoreCase))
+                link = link[(servicePath.Length + 1)..];
+        }
+
+        return NormalizeRelativeEndpoint(link);
     }
 
     private string BuildProcessamentoResponse(string responseBody)

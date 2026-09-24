@@ -51,7 +51,10 @@ namespace ExcelDoc.Server.Services
                          .OrderBy(x => x.IndiceColuna))
             {
                 rowValues.TryGetValue(campo.IndiceColuna, out var rawValue);
-                var value = ConvertValue(rawValue, campo);
+
+                var value = string.Equals(campo.NomeCampo, "SequenceModel", StringComparison.OrdinalIgnoreCase)
+                    ? (string.IsNullOrWhiteSpace(rawValue) ? null : rawValue.Trim())
+                    : ConvertValue(rawValue, campo);
 
                 if (value is not null)
                 {

@@ -143,6 +143,7 @@ public sealed class AuthServiceAuthorizationTests
 
     private sealed class RecordingSapServiceLayerClient : ISapServiceLayerClient
     {
+        public Task<IReadOnlyDictionary<string, int>> GetNFModelsAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public int LogoutCalls { get; private set; }
 
         public Task<string> GetInstallationNumberAsync(SapSessionContext session, CancellationToken cancellationToken = default) => Task.FromResult("installation");

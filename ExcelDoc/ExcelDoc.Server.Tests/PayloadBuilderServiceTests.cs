@@ -6,6 +6,27 @@ namespace ExcelDoc.Server.Tests;
 public sealed class PayloadBuilderServiceTests
 {
     [Fact]
+    public void BuildPayload_KeepsSequenceModelDescriptionEvenWhenMappedAsInteger()
+    {
+        var service = new PayloadBuilderService(new StubMessageService());
+        var mapping = new Mapeamento
+        {
+            Campos = [new MapeamentoCampo
+            {
+                NomeCampo = "SequenceModel",
+                IndiceColuna = 1,
+                TipoCampo = TipoCampo.Int,
+                Ativo = true
+            }]
+        };
+
+        var payload = service.BuildPayload(new Documento(), mapping,
+            new Dictionary<int, string?> { [1] = " Modelo 55 " });
+
+        Assert.Equal("Modelo 55", payload["SequenceModel"]);
+    }
+
+    [Fact]
     public void BuildPayload_IgnoresInactiveFieldsEvenWhenTheirValueIsInvalid()
     {
         var service = new PayloadBuilderService(new StubMessageService());

@@ -23,5 +23,9 @@ namespace ExcelDoc.Server.Services.Interfaces
             string endpoint,
             object payload,
             CancellationToken cancellationToken = default);
+
+        Task<IReadOnlyDictionary<string, int>> GetNFModelsAsync(
+            SapSessionContext session,
+            CancellationToken cancellationToken = default);
     }
 }
