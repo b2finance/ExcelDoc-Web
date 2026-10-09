@@ -811,10 +811,6 @@
       },
       "navAriaLabel": "Menú lateral",
       "items": {
-        "dashboard": {
-          "label": "Dashboard",
-          "description": "Vista general inicial"
-        },
         "documents": {
           "label": "Documentos",
           "description": "Centralice el flujo documental."

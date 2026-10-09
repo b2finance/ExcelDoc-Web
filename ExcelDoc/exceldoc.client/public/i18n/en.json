@@ -812,10 +812,6 @@
       },
       "navAriaLabel": "Side menu",
       "items": {
-        "dashboard": {
-          "label": "Dashboard",
-          "description": "Initial overview"
-        },
         "documents": {
           "label": "Documents",
           "description": "Centralize the document flow."

@@ -4,17 +4,12 @@ import { AuthGuard } from './core/guards/auth.guard';
 import { AUTH_ROLES } from './features/auth/models/auth.models';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: 'mapeamento', pathMatch: 'full' },
   {
     path: 'login',
     loadChildren: () => import('./features/auth/auth.module').then((module) => module.AuthModule)
   },
-  {
-    path: 'dashboard',
-    loadChildren: () => import('./features/dashboard/dashboard.module').then((module) => module.DashboardModule),
-    canActivate: [AuthGuard],
-    data: { roles: [AUTH_ROLES.administrator, AUTH_ROLES.user] }
-  },
+  { path: 'dashboard', redirectTo: 'mapeamento', pathMatch: 'full' },
   {
     path: 'documentos',
     loadChildren: () => import('./features/documentos/documentos.module').then((module) => module.DocumentosModule),

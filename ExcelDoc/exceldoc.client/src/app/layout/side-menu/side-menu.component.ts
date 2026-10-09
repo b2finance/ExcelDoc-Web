@@ -17,13 +17,6 @@ interface MenuItem {
 export class SideMenuComponent {
   readonly menuItems: MenuItem[] = [
     {
-      labelKey: 'layout.sideMenu.items.dashboard.label',
-      icon: 'dashboard',
-      route: '/dashboard',
-      roles: [AUTH_ROLES.administrator, AUTH_ROLES.user],
-      exact: true
-    },
-    {
       labelKey: 'layout.sideMenu.items.documents.label',
       icon: 'description',
       route: '/documentos',

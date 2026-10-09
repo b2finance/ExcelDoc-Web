@@ -812,10 +812,6 @@
       },
       "navAriaLabel": "Menu lateral",
       "items": {
-        "dashboard": {
-          "label": "Dashboard",
-          "description": "Visão geral inicial"
-        },
         "documents": {
           "label": "Documentos",
           "description": "Centralize o fluxo documental."

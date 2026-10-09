@@ -102,7 +102,7 @@ export class AuthService {
 
   getDefaultRoute(session: LoginResponse | null = this.getSession()): string {
     if (this.hasRequiredRoles([AUTH_ROLES.administrator, AUTH_ROLES.user], session)) {
-      return '/dashboard';
+      return '/mapeamento';
     }
 
     return '/login';
