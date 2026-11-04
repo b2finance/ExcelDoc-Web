@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Globalization;
 using System.IO.Compression;
 using ClosedXML.Excel;
 using ExcelDoc.Server.Background;
@@ -234,7 +235,10 @@ namespace ExcelDoc.Server.Services
                     }
 
                     var values = row.CellsUsed()
-                        .ToDictionary(cell => cell.Address.ColumnNumber, cell => cell.GetFormattedString());
+                        .ToDictionary(cell => cell.Address.ColumnNumber, cell => (string?)(
+                            cell.DataType == XLDataType.DateTime
+                                ? cell.GetDateTime().ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)
+                                : cell.GetFormattedString()));
 
                     rows.Add(new ExcelRowData
                     {

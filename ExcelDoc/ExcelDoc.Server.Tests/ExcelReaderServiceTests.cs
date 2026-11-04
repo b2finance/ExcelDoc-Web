@@ -1,13 +1,58 @@
 using System.IO.Compression;
+using System.Globalization;
 using System.Text;
 using ClosedXML.Excel;
 using ExcelDoc.Server.Localization;
+using ExcelDoc.Server.Models;
 using ExcelDoc.Server.Services;
 
 namespace ExcelDoc.Server.Tests;
 
 public sealed class ExcelReaderServiceTests
 {
+    [Theory]
+    [InlineData("en-US")]
+    [InlineData("pt-BR")]
+    public async Task ReadRowsAsync_PreservesExcelDatesInPayloadRegardlessOfServerCulture(string cultureName)
+    {
+        var originalCulture = CultureInfo.CurrentCulture;
+        var filePath = Path.Combine(Path.GetTempPath(), $"exceldoc-dates-{Guid.NewGuid():N}.xlsx");
+        try
+        {
+            using (var workbook = new XLWorkbook())
+            {
+                var sheet = workbook.AddWorksheet("Principal");
+                sheet.Cell(1, 1).Value = new DateTime(2026, 12, 10);
+                sheet.Cell(1, 2).Value = new DateTime(2026, 3, 12, 14, 30, 0);
+                sheet.Cell(1, 3).Value = "10/12/2026";
+                sheet.Range(1, 1, 1, 2).Style.DateFormat.Format = "dd/MM/yyyy";
+                workbook.SaveAs(filePath);
+            }
+
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(cultureName);
+            var rows = await new ExcelReaderService(new StubMessageService()).ReadRowsAsync(filePath);
+            var mapping = new Mapeamento
+            {
+                Campos = Enumerable.Range(1, 3).Select(index => new MapeamentoCampo
+                {
+                    NomeCampo = $"Date{index}", IndiceColuna = index,
+                    TipoCampo = TipoCampo.DateTime, Formato = "yyyy-MM-dd", Ativo = true
+                }).ToList()
+            };
+            var payload = new PayloadBuilderService(new StubMessageService())
+                .BuildPayload(new Documento(), mapping, rows.Single().Values);
+
+            Assert.Equal("2026-12-10T00:00:00", payload["Date1"]);
+            Assert.Equal("2026-03-12T14:30:00", payload["Date2"]);
+            Assert.Equal("2026-12-10T00:00:00", payload["Date3"]);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+            File.Delete(filePath);
+        }
+    }
+
     [Fact]
     public async Task ReadFirstRowAsync_ReturnsFirstRowAndPreservesIntermediateEmptyColumns()
     {
