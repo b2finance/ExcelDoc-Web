@@ -39,6 +39,7 @@ export interface MapeamentoPayload {
 export interface MapeamentoCampo {
   id: number;
   nomeCampo: string;
+  descricaoCampo: string;
   indiceColuna: number;
   tipoCampo: TipoCampo;
   formato: string | null;
@@ -48,6 +49,7 @@ export interface MapeamentoCampo {
 
 export interface MapeamentoCampoPayload {
   nomeCampo: string;
+  descricaoCampo: string;
   indiceColuna: number;
   tipoCampo: number;
   formato: string | null;
@@ -58,6 +60,7 @@ export interface MapeamentoCampoPayload {
 export interface MapeamentoCampoBatchPayload {
   id: number | null;
   nomeCampo: string;
+  descricaoCampo: string;
   indiceColuna: number;
   tipoCampo: number;
   formato: string | null;
@@ -71,6 +74,7 @@ export interface AtualizarMapeamentoCamposPayload {
 export interface MapeamentoCampoRow {
   id: number | null;
   nomeCampo: string;
+  descricaoCampo: string;
   indiceColuna: number | null;
   tipoCampo: TipoCampo | '';
   formato: string;

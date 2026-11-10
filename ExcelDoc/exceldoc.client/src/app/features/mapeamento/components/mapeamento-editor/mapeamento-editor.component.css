@@ -23,9 +23,9 @@
   transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
 }
 
-.status-toggle:not(:disabled):hover {
-  border-color: #94a3b8;
-}
+  .status-toggle:not(:disabled):hover {
+    border-color: #94a3b8;
+  }
 
 .status-toggle--active {
   border-color: #bbf7d0;
@@ -71,9 +71,9 @@
   background: #f8fafc;
 }
 
-.mapping-table .row-inactive td:not(.status-column) {
-  opacity: 0.58;
-}
+  .mapping-table .row-inactive td:not(.status-column) {
+    opacity: 0.58;
+  }
 
 .mapping-editor {
   overflow: hidden;
@@ -120,11 +120,11 @@
   color: #173d87;
 }
 
-.collection-header__icon mat-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-}
+  .collection-header__icon mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
 
 .collection-header__title-row {
   min-width: 0;
@@ -176,11 +176,11 @@
   color: #475467;
 }
 
-.readonly-chip mat-icon {
-  width: 13px;
-  height: 13px;
-  font-size: 13px;
-}
+  .readonly-chip mat-icon {
+    width: 13px;
+    height: 13px;
+    font-size: 13px;
+  }
 
 .collection-header__tools {
   justify-content: flex-end;
@@ -201,30 +201,30 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.field-search:focus-within {
-  border-color: #84adff;
-  box-shadow: 0 0 0 3px rgba(21, 94, 239, 0.1);
-}
+  .field-search:focus-within {
+    border-color: #84adff;
+    box-shadow: 0 0 0 3px rgba(21, 94, 239, 0.1);
+  }
 
-.field-search input {
-  min-width: 0;
-  flex: 1;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: #101828;
-  font-size: 0.8rem;
-}
+  .field-search input {
+    min-width: 0;
+    flex: 1;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #101828;
+    font-size: 0.8rem;
+  }
 
-.field-search input::placeholder {
-  color: #98a2b3;
-}
+    .field-search input::placeholder {
+      color: #98a2b3;
+    }
 
-.field-search mat-icon {
-  width: 19px;
-  height: 19px;
-  font-size: 19px;
-}
+  .field-search mat-icon {
+    width: 19px;
+    height: 19px;
+    font-size: 19px;
+  }
 
 .table-wrapper {
   overflow-x: auto;
@@ -232,35 +232,35 @@
 
 .mapping-table {
   width: 100%;
-  min-width: 920px;
+  min-width: 1200px;
   table-layout: fixed;
 }
 
-.mapping-table th {
-  height: 48px;
-  padding: 0 10px;
-  border-bottom-color: #e7ebf2;
-  color: #344054;
-  font-size: 0.72rem;
-  font-weight: 650;
-  white-space: nowrap;
-}
+  .mapping-table th {
+    height: 48px;
+    padding: 0 10px;
+    border-bottom-color: #e7ebf2;
+    color: #344054;
+    font-size: 0.72rem;
+    font-weight: 650;
+    white-space: nowrap;
+  }
 
-.mapping-table td {
-  height: 62px;
-  padding: 7px 10px;
-  border-bottom-color: #edf0f5;
-  color: #101828;
-  font-size: 0.82rem;
-}
+  .mapping-table td {
+    height: 62px;
+    padding: 7px 10px;
+    border-bottom-color: #edf0f5;
+    color: #101828;
+    font-size: 0.82rem;
+  }
 
-.mapping-table tr:last-child td {
-  border-bottom: 0;
-}
+  .mapping-table tr:last-child td {
+    border-bottom: 0;
+  }
 
-.mapping-table tr.mat-mdc-row:hover td {
-  background: #fbfcfe;
-}
+  .mapping-table tr.mat-mdc-row:hover td {
+    background: #fbfcfe;
+  }
 
 .drag-column {
   width: 42px;
@@ -275,23 +275,31 @@
 }
 
 .mat-column-nomeCampo {
-  width: 23%;
+  width: 190px;
+}
+
+.mat-column-descricaoCampo {
+  width: 200px;
+}
+
+.mat-column-ativo {
+  width: 120px;
 }
 
 .mat-column-indiceColuna {
-  width: 15%;
+  width: 120px;
 }
 
 .mat-column-tipoCampo {
-  width: 18%;
+  width: 155px;
 }
 
 .mat-column-formato {
-  width: 19%;
+  width: 155px;
 }
 
 .mat-column-preview {
-  width: 16%;
+  width: 140px;
 }
 
 .mat-column-acoes {
@@ -394,16 +402,16 @@
   text-align: center;
 }
 
-.empty-state mat-icon {
-  width: 34px;
-  height: 34px;
-  color: #98a2b3;
-  font-size: 34px;
-}
+  .empty-state mat-icon {
+    width: 34px;
+    height: 34px;
+    color: #98a2b3;
+    font-size: 34px;
+  }
 
-.empty-state p {
-  margin: 0;
-}
+  .empty-state p {
+    margin: 0;
+  }
 
 .editor-footer {
   min-height: 54px;
@@ -419,12 +427,12 @@
   gap: 8px;
 }
 
-.editor-hint mat-icon {
-  width: 17px;
-  height: 17px;
-  color: #155eef;
-  font-size: 17px;
-}
+  .editor-hint mat-icon {
+    width: 17px;
+    height: 17px;
+    color: #155eef;
+    font-size: 17px;
+  }
 
 .editor-footer strong {
   flex: 0 0 auto;

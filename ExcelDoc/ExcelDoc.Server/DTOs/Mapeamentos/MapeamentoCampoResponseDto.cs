@@ -8,6 +8,8 @@ namespace ExcelDoc.Server.DTOs.Mapeamentos
 
         public string NomeCampo { get; set; } = string.Empty;
 
+        public string DescricaoCampo { get; set; } = string.Empty;
+
         public int IndiceColuna { get; set; }
 
         public TipoCampo TipoCampo { get; set; }

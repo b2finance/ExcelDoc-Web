@@ -51,7 +51,7 @@ export class MapeamentoEditorComponent implements OnChanges {
 
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
-  readonly displayedColumns: string[] = ['ordem', 'nomeCampo', 'ativo', 'indiceColuna', 'tipoCampo', 'formato', 'preview', 'acoes'];
+  readonly displayedColumns: string[] = ['ordem', 'nomeCampo', 'descricaoCampo', 'ativo', 'indiceColuna', 'tipoCampo', 'formato', 'preview', 'acoes'];
   readonly tipoCampoOptions = TIPO_CAMPO_OPTIONS;
 
   rows: MapeamentoCampoRow[] = [];
@@ -115,6 +115,7 @@ export class MapeamentoEditorComponent implements OnChanges {
     const newRow: MapeamentoCampoRow = {
       id: null,
       nomeCampo: '',
+      descricaoCampo: '',
       indiceColuna: null,
       tipoCampo: '',
       formato: '',
@@ -200,6 +201,7 @@ export class MapeamentoEditorComponent implements OnChanges {
       campos: this.rows.map((row) => ({
         id: row.id,
         nomeCampo: row.nomeCampo.trim(),
+        descricaoCampo: row.descricaoCampo.trim(),
         indiceColuna: row.indiceColuna!,
         tipoCampo: row.tipoCampo as number,
         formato: row.tipoCampo === TipoCampo.DateTime ? (row.formato?.trim() || null) : null,
@@ -431,6 +433,7 @@ export class MapeamentoEditorComponent implements OnChanges {
     return {
       id: campo.id,
       nomeCampo: campo.nomeCampo,
+      descricaoCampo: campo.descricaoCampo ?? '',
       indiceColuna: campo.indiceColuna,
       tipoCampo: campo.tipoCampo,
       formato: campo.formato ?? '',
@@ -449,6 +452,7 @@ export class MapeamentoEditorComponent implements OnChanges {
     return {
       id: row.id,
       nomeCampo: row.nomeCampo,
+      descricaoCampo: row.descricaoCampo,
       indiceColuna: row.indiceColuna,
       tipoCampo: row.tipoCampo,
       formato: row.formato,

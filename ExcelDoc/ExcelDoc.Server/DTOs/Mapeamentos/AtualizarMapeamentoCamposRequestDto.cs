@@ -19,6 +19,9 @@ namespace ExcelDoc.Server.DTOs.Mapeamentos
         [MaxLength(150, ErrorMessage = MessageKeys.FieldNameMaxLength)]
         public string NomeCampo { get; set; } = string.Empty;
 
+        [MaxLength(500)]
+        public string? DescricaoCampo { get; set; }
+
         [Range(1, int.MaxValue, ErrorMessage = MessageKeys.ColumnIndexPositive)]
         public int IndiceColuna { get; set; }
 

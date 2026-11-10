@@ -454,6 +454,7 @@
       "table": {
         "header": {
           "fieldName": "Campo SAP",
+          "fieldDescription": "Descrição do campo SAP",
           "status": "Status",
           "excelColumn": "Coluna Excel",
           "type": "Tipo",
@@ -464,6 +465,7 @@
       },
       "placeholders": {
         "fieldName": "Ex.: CardCode",
+        "fieldDescription": "Opcional",
         "excelColumn": "Ex.: 1",
         "select": "Selecione",
         "format": "Ex.: yyyy-MM-dd"

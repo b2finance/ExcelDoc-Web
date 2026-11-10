@@ -85,6 +85,18 @@
         </td>
       </ng-container>
 
+      <ng-container matColumnDef="descricaoCampo">
+        <th mat-header-cell *matHeaderCellDef>{{ 'mapeamento.mapeamentoEditor.table.header.fieldDescription' | translate }}</th>
+        <td mat-cell *matCellDef="let row">
+          <mat-form-field appearance="outline" class="inline-field" subscriptSizing="dynamic">
+            <input matInput [(ngModel)]="row.descricaoCampo"
+                   (ngModelChange)="onFieldChange(row)" [disabled]="isEditingLocked" maxlength="500"
+                   [attr.aria-label]="'mapeamento.mapeamentoEditor.table.header.fieldDescription' | translate"
+                   [placeholder]="'mapeamento.mapeamentoEditor.placeholders.fieldDescription' | translate">
+          </mat-form-field>
+        </td>
+      </ng-container>
+
       <ng-container matColumnDef="ativo">
         <th mat-header-cell *matHeaderCellDef>
           {{ 'mapeamento.mapeamentoEditor.table.header.status' | translate }}
@@ -110,9 +122,11 @@
               <span class="status-toggle__thumb"></span>
             </span>
             <span class="status-toggle__label">
-              {{ (row.ativo
+              {{
+ (row.ativo
                 ? 'mapeamento.mapeamentoEditor.status.active'
-                : 'mapeamento.mapeamentoEditor.status.inactive') | translate }}
+                : 'mapeamento.mapeamentoEditor.status.inactive') | translate
+              }}
             </span>
           </button>
         </td>
@@ -211,9 +225,13 @@
   <footer class="editor-footer" *ngIf="!isLoading">
     <div class="editor-hint">
       <mat-icon>info</mat-icon>
-      <span>{{ readonly
+      <span>
+        {{
+ readonly
         ? ('mapeamento.mapeamentoEditor.footer.cloneHint' | translate)
-        : ('mapeamento.mapeamentoEditor.footer.editHint' | translate) }}</span>
+        : ('mapeamento.mapeamentoEditor.footer.editHint' | translate)
+        }}
+      </span>
     </div>
     <strong>{{ visibleRows.length }} {{ 'mapeamento.mapeamentoEditor.footer.of' | translate }} {{ rows.length }} {{ 'mapeamento.mapeamentoEditor.footer.fields' | translate }}</strong>
   </footer>

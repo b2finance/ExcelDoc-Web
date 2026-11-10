@@ -44,6 +44,7 @@ namespace ExcelDoc.Server.Services
             var campo = new MapeamentoCampo
             {
                 NomeCampo = request.NomeCampo.Trim(),
+                DescricaoCampo = request.DescricaoCampo?.Trim() ?? string.Empty,
                 IndiceColuna = request.IndiceColuna,
                 TipoCampo = request.TipoCampo,
                 Formato = request.TipoCampo == TipoCampo.DateTime ? request.Formato?.Trim() : null,
@@ -73,6 +74,7 @@ namespace ExcelDoc.Server.Services
             await ValidateCampoAsync(request, id, cancellationToken);
 
             campo.NomeCampo = request.NomeCampo.Trim();
+            campo.DescricaoCampo = request.DescricaoCampo?.Trim() ?? campo.DescricaoCampo;
             campo.IndiceColuna = request.IndiceColuna;
             campo.TipoCampo = request.TipoCampo;
             campo.Formato = request.TipoCampo == TipoCampo.DateTime ? request.Formato?.Trim() : null;
@@ -133,9 +135,8 @@ namespace ExcelDoc.Server.Services
                     throw new InvalidOperationException(_messageService.Get(MessageKeys.DateTimeFieldFormatRequired));
                 }
 
-                var descricao = campoRequest.Id.HasValue
-                    ? camposExistentesPorId[campoRequest.Id.Value].DescricaoCampo
-                    : string.Empty;
+                var descricao = campoRequest.DescricaoCampo?.Trim()
+                    ?? (campoRequest.Id.HasValue ? camposExistentesPorId[campoRequest.Id.Value].DescricaoCampo : string.Empty);
 
                 return new MapeamentoCampo
                 {
@@ -201,6 +202,7 @@ namespace ExcelDoc.Server.Services
             {
                 Id = campo.Id,
                 NomeCampo = campo.NomeCampo,
+                DescricaoCampo = campo.DescricaoCampo,
                 IndiceColuna = campo.IndiceColuna,
                 TipoCampo = campo.TipoCampo,
                 Formato = campo.Formato,
