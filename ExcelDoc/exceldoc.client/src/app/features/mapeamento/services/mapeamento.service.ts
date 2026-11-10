@@ -71,7 +71,15 @@ export class MapeamentoService {
     );
   }
 
-  downloadPlanilhaExemplo(): Observable<Blob> {
-    return this.httpService.getBlob('/api/planilhas/exemplo');
+  downloadPlanilhaExemplo(perfilId: number | null): Observable<Blob> {
+    const params = perfilId === null ? undefined : { perfilId };
+    return this.httpService.getBlob('/api/planilhas/exemplo', {
+      params,
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+  }
+
+  downloadPlanilhaExemploPadrao(): Observable<Blob> {
+    return this.httpService.getBlob('/api/planilhas/exemplo/padrao');
   }
 }

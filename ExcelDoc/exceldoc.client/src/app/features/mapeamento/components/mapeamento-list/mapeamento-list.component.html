@@ -157,6 +157,7 @@
 
       <main class="fields-panel">
         <app-mapeamento-editor *ngIf="selectedMapeamento && itemAtual as item"
+                               [perfilId]="selectedPerfilId"
                                [colecaoId]="item.fk_IdColecao"
                                [colecaoNome]="item.nomeColecao"
                                [mapeamento]="selectedMapeamento"

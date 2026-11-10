@@ -372,4 +372,13 @@
   <data name="InvalidOutputDirectory" xml:space="preserve">
     <value>El archivo se encuentra fuera del directorio de carga configurado.</value>
   </data>
+  <data name="MappingProfileRequired" xml:space="preserve">
+    <value>Seleccione un perfil de asignación para descargar la hoja de cálculo de ejemplo.</value>
+  </data>
+  <data name="ExampleSpreadsheetColumnOutOfRange" xml:space="preserve">
+    <value>El campo {0} está asignado a la columna {1}. Use un índice entre 2 y {2}, ya que la primera columna se reserva para el identificador #.</value>
+  </data>
+  <data name="ExampleSpreadsheetDuplicateColumn" xml:space="preserve">
+    <value>La columna {0} está asignada a más de un campo en el perfil seleccionado.</value>
+  </data>
 </root>

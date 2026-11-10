@@ -43,7 +43,7 @@ namespace ExcelDoc.Server.Services
             foreach (var headerItem in headerItems)
             {
                 var headerPayload = _payloadBuilder.BuildPayload(
-                    perfil.Documento, headerItem.Mapeamento, firstRow.Values);
+                    perfil.Documento, headerItem.Mapeamento, firstRow);
 
                 foreach (var kvp in headerPayload)
                 {
@@ -79,7 +79,7 @@ namespace ExcelDoc.Server.Services
             foreach (var row in rows)
             {
                 var linePayload = _payloadBuilder.BuildPayload(
-                    perfil.Documento, lineItem.Mapeamento, row.Values);
+                    perfil.Documento, lineItem.Mapeamento, row);
 
                 if (childrenByParentId.TryGetValue(lineItem.Id, out var childItems))
                 {

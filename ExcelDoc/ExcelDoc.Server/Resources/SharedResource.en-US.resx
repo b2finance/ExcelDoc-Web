@@ -372,4 +372,13 @@
   <data name="InvalidOutputDirectory" xml:space="preserve">
     <value>The file is outside the configured upload directory.</value>
   </data>
+  <data name="MappingProfileRequired" xml:space="preserve">
+    <value>Select a mapping profile to download the example spreadsheet.</value>
+  </data>
+  <data name="ExampleSpreadsheetColumnOutOfRange" xml:space="preserve">
+    <value>Field {0} is mapped to column {1}. Use a column from 2 through {2}, as the first column is reserved for the # identifier.</value>
+  </data>
+  <data name="ExampleSpreadsheetDuplicateColumn" xml:space="preserve">
+    <value>Column {0} is mapped to more than one field in the selected profile.</value>
+  </data>
 </root>

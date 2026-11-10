@@ -10,6 +10,8 @@ namespace ExcelDoc.Server.Services
 {
     public class ExcelReaderService : IExcelReaderService
     {
+        internal const string UseRawNumericValuesProperty = "ExcelDocUseRawNumericValues";
+
         private const int MaxPreviewInputBytes = 10_000_000;
         private const int MaxPreviewArchiveEntries = 2_048;
         private const long MaxPreviewUncompressedBytes = 64_000_000;
@@ -223,6 +225,8 @@ namespace ExcelDoc.Server.Services
                 using var workbook = new XLWorkbook(filePath);
                 var worksheet = GetImportWorksheet(workbook)
                     ?? throw new InvalidDataException("The Excel workbook does not contain worksheets.");
+                var useRawNumericValues = workbook.CustomProperties.Any(property =>
+                    property.Name == UseRawNumericValuesProperty && property.Value is true);
                 var rows = new List<ExcelRowData>();
 
                 foreach (var row in worksheet.RowsUsed())
@@ -234,16 +238,28 @@ namespace ExcelDoc.Server.Services
                         continue;
                     }
 
-                    var values = row.CellsUsed()
-                        .ToDictionary(cell => cell.Address.ColumnNumber, cell => (string?)(
-                            cell.DataType == XLDataType.DateTime
-                                ? cell.GetDateTime().ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)
-                                : cell.GetFormattedString()));
+                    var values = new Dictionary<int, string?>();
+                    var numericValues = useRawNumericValues ? new Dictionary<int, double>() : null;
+
+                    foreach (var cell in row.CellsUsed())
+                    {
+                        var columnNumber = cell.Address.ColumnNumber;
+                        var dataType = cell.DataType;
+                        values.Add(columnNumber, dataType == XLDataType.DateTime
+                            ? cell.GetDateTime().ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)
+                            : cell.GetFormattedString());
+
+                        if (numericValues is not null && dataType == XLDataType.Number)
+                        {
+                            numericValues.Add(columnNumber, cell.GetDouble());
+                        }
+                    }
 
                     rows.Add(new ExcelRowData
                     {
                         RowNumber = row.RowNumber(),
-                        Values = values
+                        Values = values,
+                        NumericValues = numericValues
                     });
                 }
 

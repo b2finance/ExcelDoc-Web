@@ -285,6 +285,15 @@
   <data name="MappingProfileNotFound" xml:space="preserve">
     <value>Perfil de mapeamento não encontrado.</value>
   </data>
+  <data name="MappingProfileRequired" xml:space="preserve">
+    <value>Selecione um perfil de mapeamento para baixar a planilha de exemplo.</value>
+  </data>
+  <data name="ExampleSpreadsheetColumnOutOfRange" xml:space="preserve">
+    <value>O campo {0} está mapeado na coluna {1}. Use um índice entre 2 e {2}, pois a primeira coluna é reservada para o identificador #.</value>
+  </data>
+  <data name="ExampleSpreadsheetDuplicateColumn" xml:space="preserve">
+    <value>A coluna {0} está mapeada para mais de um campo no perfil selecionado.</value>
+  </data>
   <data name="MappingNotFound" xml:space="preserve">
     <value>Mapeamento não encontrado.</value>
   </data>

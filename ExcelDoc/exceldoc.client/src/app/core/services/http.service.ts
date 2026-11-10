@@ -1,10 +1,11 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 type HttpQueryParamValue = string | number | boolean | ReadonlyArray<string | number | boolean>;
 
 export interface HttpRequestOptions {
+  headers?: HttpHeaders | Record<string, string | string[]>;
   params?: HttpParams | Record<string, HttpQueryParamValue>;
 }
 

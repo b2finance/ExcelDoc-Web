@@ -40,7 +40,7 @@ public sealed class ExcelReaderServiceTests
                 }).ToList()
             };
             var payload = new PayloadBuilderService(new StubMessageService())
-                .BuildPayload(new Documento(), mapping, rows.Single().Values);
+                .BuildPayload(new Documento(), mapping, rows.Single());
 
             Assert.Equal("2026-12-10T00:00:00", payload["Date1"]);
             Assert.Equal("2026-03-12T14:30:00", payload["Date2"]);

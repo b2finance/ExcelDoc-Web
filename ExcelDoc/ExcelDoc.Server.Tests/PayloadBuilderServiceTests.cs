@@ -1,3 +1,4 @@
+using ExcelDoc.Server.Background;
 using ExcelDoc.Server.Models;
 using ExcelDoc.Server.Services;
 
@@ -21,7 +22,7 @@ public sealed class PayloadBuilderServiceTests
         };
 
         var payload = service.BuildPayload(new Documento(), mapping,
-            new Dictionary<int, string?> { [1] = " Modelo 55 " });
+            new ExcelRowData { Values = new Dictionary<int, string?> { [1] = " Modelo 55 " } });
 
         Assert.Equal("Modelo 55", payload["SequenceModel"]);
     }
@@ -54,10 +55,13 @@ public sealed class PayloadBuilderServiceTests
         var result = service.BuildPayload(
             new Documento(),
             mapping,
-            new Dictionary<int, string?>
+            new ExcelRowData
             {
-                [1] = "C20000",
-                [2] = "valor-invalido"
+                Values = new Dictionary<int, string?>
+                {
+                    [1] = "C20000",
+                    [2] = "valor-invalido"
+                }
             });
 
         Assert.Equal("C20000", result["CardCode"]);

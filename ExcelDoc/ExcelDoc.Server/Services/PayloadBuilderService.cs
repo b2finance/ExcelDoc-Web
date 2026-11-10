@@ -1,4 +1,5 @@
 using System.Globalization;
+using ExcelDoc.Server.Background;
 using ExcelDoc.Server.Localization;
 using ExcelDoc.Server.Models;
 using ExcelDoc.Server.Services.Interfaces;
@@ -42,7 +43,7 @@ namespace ExcelDoc.Server.Services
             _messageService = messageService;
         }
 
-        public IDictionary<string, object?> BuildPayload(Documento documento, Mapeamento mapeamento, IReadOnlyDictionary<int, string?> rowValues)
+        public IDictionary<string, object?> BuildPayload(Documento documento, Mapeamento mapeamento, ExcelRowData row)
         {
             var payload = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
 
@@ -50,11 +51,14 @@ namespace ExcelDoc.Server.Services
                          .Where(x => x.Ativo)
                          .OrderBy(x => x.IndiceColuna))
             {
-                rowValues.TryGetValue(campo.IndiceColuna, out var rawValue);
+                row.Values.TryGetValue(campo.IndiceColuna, out var rawValue);
+                var numericValue = row.NumericValues?.TryGetValue(campo.IndiceColuna, out var number) == true
+                    ? number
+                    : (double?)null;
 
                 var value = string.Equals(campo.NomeCampo, "SequenceModel", StringComparison.OrdinalIgnoreCase)
                     ? (string.IsNullOrWhiteSpace(rawValue) ? null : rawValue.Trim())
-                    : ConvertValue(rawValue, campo);
+                    : ConvertValue(rawValue, campo, numericValue);
 
                 if (value is not null)
                 {
@@ -65,7 +69,7 @@ namespace ExcelDoc.Server.Services
             return payload;
         }
 
-        private object? ConvertValue(string? rawValue, MapeamentoCampo campo)
+        private object? ConvertValue(string? rawValue, MapeamentoCampo campo, double? numericValue)
         {
             if (string.IsNullOrWhiteSpace(rawValue))
             {
@@ -77,21 +81,21 @@ namespace ExcelDoc.Server.Services
             return campo.TipoCampo switch
             {
                 TipoCampo.String => value,
-                TipoCampo.Int => ParseInt(value),
-                TipoCampo.Double => ParseDouble(value),
+                TipoCampo.Int => ParseInt(value, numericValue),
+                TipoCampo.Double => numericValue ?? ParseDouble(value),
                 TipoCampo.DateTime => ParseDateTime(value, campo.Formato),
                 TipoCampo.Boolean => ParseBoolean(value),
                 _ => value
             };
         }
 
-        private int ParseInt(string value)
+        private int ParseInt(string value, double? numericValue)
         {
-            var number = ParseDouble(value);
-
+            var number = numericValue ?? ParseDouble(value);
             if (number % 1 != 0)
             {
-                throw new FormatException(_messageService.Get(MessageKeys.InvalidIntegerValue, value));
+                var invalidValue = numericValue?.ToString(CultureInfo.CurrentCulture) ?? value;
+                throw new FormatException(_messageService.Get(MessageKeys.InvalidIntegerValue, invalidValue));
             }
 
             return Convert.ToInt32(number);

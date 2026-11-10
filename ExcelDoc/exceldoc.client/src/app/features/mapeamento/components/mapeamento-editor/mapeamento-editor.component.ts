@@ -38,6 +38,7 @@ export interface MapeamentoEditorState {
   styleUrl: './mapeamento-editor.component.css'
 })
 export class MapeamentoEditorComponent implements OnChanges {
+  @Input() perfilId: number | null = null;
   @Input({ required: true }) colecaoId!: number;
   @Input() colecaoNome = '';
   @Input({ required: true }) mapeamento!: Mapeamento;
@@ -247,12 +248,16 @@ export class MapeamentoEditorComponent implements OnChanges {
   }
 
   baixarPlanilhaExemplo(): void {
-    if (this.isDownloadingExample) {
+    if (this.isDownloadingExample || this.isSaving) {
       return;
     }
 
     this.isDownloadingExample = true;
-    this.mapeamentoService.downloadPlanilhaExemplo()
+    const download = this.managedActions
+      ? this.mapeamentoService.downloadPlanilhaExemplo(this.perfilId)
+      : this.mapeamentoService.downloadPlanilhaExemploPadrao();
+
+    download
       .pipe(
         finalize(() => { this.isDownloadingExample = false; }),
         takeUntilDestroyed(this.destroyRef)
@@ -266,9 +271,20 @@ export class MapeamentoEditorComponent implements OnChanges {
           link.click();
           URL.revokeObjectURL(url);
         },
-        error: (error: HttpErrorResponse) => {
+        error: async (error: HttpErrorResponse) => {
+          let detail: unknown = error.error?.detail;
+          if (error.error instanceof Blob && error.error.type.includes('json')) {
+            try {
+              detail = JSON.parse(await error.error.text())?.detail;
+            } catch {
+              detail = undefined;
+            }
+          }
+
           this.notificationService.showError(
-            error.error?.detail ?? this.translate.instant('mapeamento.mapeamentoEditor.feedback.errors.downloadExampleSpreadsheet')
+            typeof detail === 'string'
+              ? detail
+              : this.translate.instant('mapeamento.mapeamentoEditor.feedback.errors.downloadExampleSpreadsheet')
           );
         }
       });

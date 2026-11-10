@@ -29,6 +29,8 @@ public static class MessageKeys
     public const string DocumentRequired = nameof(DocumentRequired);
     public const string DuplicateCollectionsProfile = nameof(DuplicateCollectionsProfile);
     public const string EmptyIdExcelValueAtRow = nameof(EmptyIdExcelValueAtRow);
+    public const string ExampleSpreadsheetColumnOutOfRange = nameof(ExampleSpreadsheetColumnOutOfRange);
+    public const string ExampleSpreadsheetDuplicateColumn = nameof(ExampleSpreadsheetDuplicateColumn);
     public const string FileRequired = nameof(FileRequired);
     public const string FieldNameMaxLength = nameof(FieldNameMaxLength);
     public const string FieldNameRequired = nameof(FieldNameRequired);
@@ -57,6 +59,7 @@ public static class MessageKeys
     public const string MappingProfileDoesNotBelongToDocument = nameof(MappingProfileDoesNotBelongToDocument);
     public const string MappingProfileHasNoItems = nameof(MappingProfileHasNoItems);
     public const string MappingProfileNotFound = nameof(MappingProfileNotFound);
+    public const string MappingProfileRequired = nameof(MappingProfileRequired);
     public const string MappingProfileDocumentCannotBeChanged = nameof(MappingProfileDocumentCannotBeChanged);
     public const string MappingCollectionCannotBeChanged = nameof(MappingCollectionCannotBeChanged);
     public const string MappingNotFound = nameof(MappingNotFound);
