@@ -8,7 +8,7 @@ import { LanguageService } from '../../../core/services/language.service';
   // fallback inline styles to avoid compiler errors if external css isn't resolved
   styles: [`.lang-flags{display:flex;gap:8px;align-items:center}
             .flag-btn{background:transparent;border:1px solid transparent;padding:4px;border-radius:4px;cursor:pointer}
-            .flag-btn[aria-pressed="true"]{outline:2px solid #1976d2}
+            .flag-btn[aria-pressed="true"]{outline:2px solid var(--field-border-focus)}
             .flag-btn img{width:26px;height:18px;display:block}`]
 })
 export class LanguageSelectorComponent {

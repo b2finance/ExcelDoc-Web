@@ -5,7 +5,7 @@
 
 .upload-workspace {
   min-width: 0;
-  color: #101828;
+  color: var(--primary-text);
 }
 
 .context-bar,
@@ -24,7 +24,7 @@
 .context-bar {
   min-height: 54px;
   padding: 0 2px 16px;
-  color: #475467;
+  color: var(--secondary-text);
   font-size: 0.78rem;
 }
 
@@ -33,37 +33,37 @@
   white-space: nowrap;
 }
 
-.breadcrumbs mat-icon {
-  width: 17px;
-  height: 17px;
-  font-size: 17px;
-}
+  .breadcrumbs mat-icon {
+    width: 17px;
+    height: 17px;
+    font-size: 17px;
+  }
 
-.breadcrumbs > mat-icon:first-child {
-  color: #344054;
-}
+  .breadcrumbs > mat-icon:first-child {
+    color: var(--secondary-text);
+  }
 
 .breadcrumbs__separator {
-  color: #98a2b3;
+  color: var(--secondary-text);
 }
 
 .breadcrumbs strong {
-  color: #1d2939;
+  color: var(--primary-text);
   font-weight: 650;
 }
 
 .workspace-card {
   overflow: hidden;
-  border: 1px solid #dfe5ef;
+  border: 1px solid var(--border-color);
   border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 14px 38px rgba(16, 24, 40, 0.05);
+  background: var(--card-bg);
+  box-shadow: 0 14px 38px color-mix(in srgb, var(--primary-dark) 5%, transparent);
 }
 
 .workspace-header {
   min-height: 126px;
   padding: 26px;
-  border-bottom: 1px solid #e7ebf2;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .workspace-header__title-row {
@@ -76,8 +76,8 @@
 .file-panel__icon {
   display: grid;
   place-items: center;
-  background: #eaf1ff;
-  color: #155eef;
+  background: var(--primary-light);
+  color: var(--primary-color);
 }
 
 .workspace-header__icon {
@@ -95,7 +95,7 @@
 }
 
 .workspace-header h1 {
-  color: #0b1739;
+  color: var(--primary-text);
   font-size: clamp(1.55rem, 2vw, 2rem);
   font-weight: 750;
   letter-spacing: -0.035em;
@@ -103,7 +103,7 @@
 
 .workspace-header p {
   margin-top: 8px;
-  color: #667085;
+  color: var(--secondary-text);
   font-size: 0.82rem;
 }
 
@@ -115,20 +115,20 @@
 
 .configuration-panel,
 .file-panel {
-  border: 1px solid #e0e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 13px;
 }
 
 .configuration-panel {
   overflow: hidden;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .panel-header {
   gap: 12px;
   padding: 17px 18px;
-  border-bottom: 1px solid #e0e6ef;
-  background: #fbfcfe;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--secondary-bg);
 }
 
 .panel-header__icon {
@@ -139,13 +139,13 @@
 }
 
 .panel-header h2 {
-  color: #1d2939;
+  color: var(--primary-text);
   font-size: 0.92rem;
 }
 
 .panel-header p {
   margin-top: 3px;
-  color: #667085;
+  color: var(--secondary-text);
   font-size: 0.72rem;
 }
 
@@ -156,9 +156,9 @@
   padding: 24px 20px;
 }
 
-.configuration-fields mat-form-field {
-  width: 100%;
-}
+  .configuration-fields mat-form-field {
+    width: 100%;
+  }
 
 :host ::ng-deep .configuration-fields .mat-mdc-text-field-wrapper {
   border-radius: 9px;
@@ -166,7 +166,7 @@
 
 :host ::ng-deep .configuration-fields .mat-mdc-form-field-icon-prefix {
   padding: 0 10px 0 0;
-  color: #8091ab;
+  color: var(--secondary-text);
 }
 
 .mapping-option {
@@ -180,7 +180,7 @@
 
 .mapping-option__meta {
   gap: 0.5rem;
-  color: #64748b;
+  color: var(--secondary-text);
   font-size: 0.75rem;
 }
 
@@ -194,20 +194,20 @@
 }
 
 .mapping-chip--padrao {
-  background: #eaf1ff;
-  color: #155eef;
+  background: var(--primary-light);
+  color: var(--primary-color);
 }
 
 .mapping-chip--custom {
-  background: #ecfdf3;
-  color: #027a48;
+  background: color-mix(in srgb, var(--success-color) 12%, var(--white));
+  color: var(--primary-dark);
 }
 
 .file-panel {
   justify-content: space-between;
   gap: 20px;
   padding: 20px;
-  background: #fbfcfe;
+  background: var(--secondary-bg);
 }
 
 .file-panel__copy {
@@ -230,14 +230,14 @@
 
 .file-panel strong {
   overflow: hidden;
-  color: #1d2939;
+  color: var(--primary-text);
   font-size: 0.84rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .file-panel span {
-  color: #667085;
+  color: var(--secondary-text);
   font-size: 0.72rem;
 }
 
@@ -252,9 +252,9 @@
   gap: 12px;
 }
 
-.form-actions button {
-  padding-inline: 22px;
-}
+  .form-actions button {
+    padding-inline: 22px;
+  }
 
 @media (max-width: 720px) {
   .workspace-header {
@@ -275,8 +275,8 @@
     flex-direction: column;
   }
 
-  .file-panel button,
-  .form-actions button {
-    width: 100%;
-  }
+    .file-panel button,
+    .form-actions button {
+      width: 100%;
+    }
 }

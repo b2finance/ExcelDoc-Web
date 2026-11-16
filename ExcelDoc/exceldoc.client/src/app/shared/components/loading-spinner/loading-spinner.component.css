@@ -6,5 +6,5 @@
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  color: #475569;
+  color: var(--secondary-text);
 }

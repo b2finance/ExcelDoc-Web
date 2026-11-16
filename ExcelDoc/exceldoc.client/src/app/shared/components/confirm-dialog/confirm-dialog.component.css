@@ -4,5 +4,5 @@
 
 mat-dialog-content {
   min-width: min(100vw - 4rem, 320px);
-  color: #475569;
+  color: var(--secondary-text);
 }

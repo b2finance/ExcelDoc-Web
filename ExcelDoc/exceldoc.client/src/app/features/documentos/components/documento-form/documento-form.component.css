@@ -5,7 +5,7 @@
 
 .document-form-workspace {
   min-width: 0;
-  color: #101828;
+  color: var(--primary-text);
 }
 
 .context-bar,
@@ -21,7 +21,7 @@
 .context-bar {
   min-height: 54px;
   padding: 0 2px 16px;
-  color: #475467;
+  color: var(--secondary-text);
   font-size: 0.78rem;
 }
 
@@ -46,30 +46,30 @@
   }
 
   .breadcrumbs > mat-icon:first-child {
-    color: #344054;
+    color: var(--secondary-text);
   }
 
 .breadcrumbs__separator {
-  color: #98a2b3;
+  color: var(--secondary-text);
 }
 
 .breadcrumbs strong {
-  color: #1d2939;
+  color: var(--primary-text);
   font-weight: 650;
 }
 
 .workspace-card {
   overflow: hidden;
-  border: 1px solid #dfe5ef;
+  border: 1px solid var(--border-color);
   border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 14px 38px rgba(16, 24, 40, 0.05);
+  background: var(--card-bg);
+  box-shadow: 0 14px 38px color-mix(in srgb, var(--primary-dark) 5%, transparent);
 }
 
 .workspace-header {
   min-height: 126px;
   padding: 26px;
-  border-bottom: 1px solid #e7ebf2;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .workspace-header__title-row {
@@ -81,8 +81,8 @@
 .form-panel__icon {
   display: grid;
   place-items: center;
-  background: #eaf1ff;
-  color: #155eef;
+  background: var(--primary-light);
+  color: var(--primary-color);
 }
 
 .workspace-header__icon {
@@ -100,7 +100,7 @@
 }
 
 .workspace-header h1 {
-  color: #0b1739;
+  color: var(--primary-text);
   font-size: clamp(1.55rem, 2vw, 2rem);
   font-weight: 750;
   letter-spacing: -0.035em;
@@ -108,7 +108,7 @@
 
 .workspace-header p {
   margin-top: 8px;
-  color: #667085;
+  color: var(--secondary-text);
   font-size: 0.88rem;
 }
 
@@ -126,10 +126,10 @@
   gap: 10px;
   margin-bottom: 16px;
   padding: 12px 14px;
-  border: 1px solid #fecdca;
+  border: 1px solid color-mix(in srgb, var(--error-color) 25%, var(--white));
   border-radius: 10px;
-  background: #fef3f2;
-  color: #b42318;
+  background: color-mix(in srgb, var(--error-color) 10%, var(--white));
+  color: var(--primary-dark);
   font-size: 0.8rem;
 }
 
@@ -139,15 +139,15 @@
 
 .form-panel {
   overflow: hidden;
-  border: 1px solid #e0e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 13px;
-  background: #fbfcfe;
+  background: var(--secondary-bg);
 }
 
 .form-panel__header {
   gap: 12px;
   padding: 18px 20px;
-  border-bottom: 1px solid #e0e6ef;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .form-panel__icon {
@@ -158,13 +158,13 @@
 }
 
 .form-panel h2 {
-  color: #1d2939;
+  color: var(--primary-text);
   font-size: 0.95rem;
 }
 
 .form-panel p {
   margin-top: 3px;
-  color: #667085;
+  color: var(--secondary-text);
   font-size: 0.75rem;
 }
 
@@ -173,7 +173,7 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
   padding: 24px 20px;
-  background: #fff;
+  background: var(--card-bg);
 }
 
   .form-panel__fields mat-form-field {
@@ -186,7 +186,7 @@
 
 :host ::ng-deep .form-panel__fields .mat-mdc-form-field-icon-prefix {
   padding: 0 10px 0 0;
-  color: #8091ab;
+  color: var(--secondary-text);
 }
 
   :host ::ng-deep .form-panel__fields .mat-mdc-form-field-icon-prefix mat-icon {

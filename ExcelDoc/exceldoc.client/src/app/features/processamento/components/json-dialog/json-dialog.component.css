@@ -1,6 +1,6 @@
 :host {
   display: block;
-  color: #101828;
+  color: var(--primary-text);
 }
 
 h2[mat-dialog-title] {
@@ -8,7 +8,7 @@ h2[mat-dialog-title] {
   align-items: center;
   gap: 10px;
   margin-bottom: 0;
-  color: #0b1739;
+  color: var(--primary-text);
   font-size: 1.05rem;
   font-weight: 700;
 }
@@ -19,8 +19,8 @@ h2[mat-dialog-title] {
   display: grid;
   place-items: center;
   border-radius: 9px;
-  background: #eaf1ff;
-  color: #155eef;
+  background: var(--primary-light);
+  color: var(--primary-color);
 }
 
   .dialog-title__icon mat-icon {
@@ -35,7 +35,7 @@ mat-dialog-content {
 
 h4 {
   margin: 18px 0 8px;
-  color: #344054;
+  color: var(--secondary-text);
   font-size: 0.75rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -50,10 +50,10 @@ h4 {
   margin: 0;
   overflow: auto;
   padding: 14px;
-  border: 1px solid #e0e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 9px;
-  background: #f8faff;
-  color: #344054;
+  background: var(--primary-light);
+  color: var(--secondary-text);
   font-size: 0.78rem;
   line-height: 1.55;
   white-space: pre-wrap;
@@ -62,7 +62,7 @@ h4 {
 
 mat-dialog-actions {
   padding: 12px 24px 20px;
-  border-top: 1px solid #e7ebf2;
+  border-top: 1px solid var(--border-color);
 }
 
   mat-dialog-actions button {

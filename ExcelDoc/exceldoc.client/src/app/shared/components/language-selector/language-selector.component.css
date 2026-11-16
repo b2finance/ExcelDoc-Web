@@ -13,7 +13,7 @@
 }
 
   .flag-btn[aria-pressed="true"] {
-    outline: 2px solid #1976d2
+    outline: 2px solid var(--field-border-focus)
   }
 
   .flag-btn img {

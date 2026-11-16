@@ -1,4 +1,101 @@
 @import '@angular/material/prebuilt-themes/azure-blue.css';
+@import '@fontsource/roboto/latin-400.css';
+@import '@fontsource/roboto/latin-500.css';
+@import '@fontsource/roboto/latin-600.css';
+@import '@fontsource/roboto/latin-700.css';
+@import '@fontsource/roboto/latin-800.css';
+
+:root {
+  color-scheme: light;
+  /* Paleta de marca */
+  --primary-color: #142452;
+  --primary-dark: #071126;
+  --primary-light: #f5f6f8;
+  --accent-color: #e62835;
+  --accent-dark: #071126;
+  --accent-light: #ffffff;
+  /* Estados semânticos */
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --error-color: #f44336;
+  /* Neutros */
+  --white: #ffffff;
+  --black: #000000;
+  --gray-50: #f5f6f8;
+  --gray-100: #f5f6f8;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #071126;
+  /* Tokens semânticos do tema claro */
+  --primary-bg: #ffffff;
+  --secondary-bg: #f5f6f8;
+  --content-bg: #f5f6f8;
+  --card-bg: #ffffff;
+  --primary-text: #071126;
+  --secondary-text: #6b7280;
+  --border-color: rgba(20, 36, 82, 0.12);
+  --table-even-bg: #f5f6f8;
+  --table-odd-bg: #ffffff;
+  --button-bg: #e62835;
+  --button-text: #ffffff;
+  --button-hover-bg: #142452;
+  --button-hover-text: #ffffff;
+  --field-border-focus: #142452;
+  /* Angular Material: superfícies e texto */
+  --mat-app-background-color: var(--primary-bg);
+  --mat-app-text-color: var(--primary-text);
+  --mat-option-label-text-color: var(--primary-text);
+  --mat-option-selected-state-label-text-color: var(--primary-color);
+  --mat-option-hover-state-layer-color: var(--secondary-bg);
+  --mat-option-focus-state-layer-color: var(--secondary-bg);
+  --mat-option-selected-state-layer-color: var(--primary-light);
+  /* Angular Material: botões */
+  --mdc-filled-button-container-color: var(--button-bg);
+  --mdc-filled-button-label-text-color: var(--button-text);
+  --mdc-protected-button-container-color: var(--button-bg);
+  --mdc-protected-button-label-text-color: var(--button-text);
+  --mdc-text-button-label-text-color: var(--primary-color);
+  --mdc-outlined-button-label-text-color: var(--primary-color);
+  --mdc-outlined-button-outline-color: var(--border-color);
+  /* Angular Material: campos e seleção */
+  --mdc-filled-text-field-container-color: var(--secondary-bg);
+  --mdc-filled-text-field-input-text-color: var(--primary-text);
+  --mdc-filled-text-field-label-text-color: var(--secondary-text);
+  --mdc-filled-text-field-active-indicator-color: var(--border-color);
+  --mdc-filled-text-field-focus-active-indicator-color: var(--field-border-focus);
+  --mdc-filled-text-field-focus-label-text-color: var(--field-border-focus);
+  --mdc-outlined-text-field-input-text-color: var(--primary-text);
+  --mdc-outlined-text-field-label-text-color: var(--secondary-text);
+  --mdc-outlined-text-field-outline-color: var(--border-color);
+  --mdc-outlined-text-field-focus-outline-color: var(--field-border-focus);
+  --mdc-outlined-text-field-focus-label-text-color: var(--field-border-focus);
+  --mat-select-panel-background-color: var(--card-bg);
+  --mat-autocomplete-background-color: var(--card-bg);
+  /* Angular Material: diálogos, menus e dicas */
+  --mdc-dialog-container-color: var(--card-bg);
+  --mdc-dialog-subhead-color: var(--primary-text);
+  --mdc-dialog-supporting-text-color: var(--secondary-text);
+  --mat-menu-container-color: var(--card-bg);
+  --mat-menu-divider-color: var(--border-color);
+  --mat-menu-item-label-text-color: var(--primary-text);
+  --mat-menu-item-hover-state-layer-color: var(--secondary-bg);
+  --mat-menu-item-focus-state-layer-color: var(--secondary-bg);
+  --mdc-plain-tooltip-container-color: var(--primary-dark);
+  --mdc-plain-tooltip-supporting-text-color: var(--white);
+  /* Estados de erro permanecem distintos da cor de destaque da marca */
+  --mat-form-field-error-text-color: var(--error-color);
+  --mdc-filled-text-field-error-active-indicator-color: var(--error-color);
+  --mdc-filled-text-field-error-focus-active-indicator-color: var(--error-color);
+  --mdc-filled-text-field-error-label-text-color: var(--error-color);
+  --mdc-outlined-text-field-error-outline-color: var(--error-color);
+  --mdc-outlined-text-field-error-focus-outline-color: var(--error-color);
+  --mdc-outlined-text-field-error-label-text-color: var(--error-color);
+}
 
 @font-face {
   font-family: 'Material Symbols Rounded';
@@ -16,9 +113,9 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  font-family: Inter, Arial, sans-serif;
-  background: linear-gradient(180deg, #e2e8f0 0%, #f8fafc 100%);
-  color: #0f172a;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--primary-bg);
+  color: var(--primary-text);
 }
 
 body {
@@ -56,36 +153,36 @@ input {
 }
 
 .feedback--error {
-  background: #fee2e2;
-  color: #991b1b;
+  background: color-mix(in srgb, var(--error-color) 10%, var(--white));
+  color: var(--primary-dark);
 }
 
 .feedback--success {
-  background: #dcfce7;
-  color: #166534;
+  background: color-mix(in srgb, var(--success-color) 12%, var(--white));
+  color: var(--primary-dark);
 }
 
 .feedback--info {
-  background: #e0f2fe;
-  color: #075985;
+  background: var(--primary-light);
+  color: var(--primary-color);
 }
 
 .error-snackbar,
 .info-snackbar,
 .success-snackbar {
-  --mdc-snackbar-container-color: #0f172a;
-  --mat-snack-bar-button-color: #ffffff;
-  --mdc-snackbar-supporting-text-color: #ffffff;
+  --mdc-snackbar-container-color: var(--primary-dark);
+  --mat-snack-bar-button-color: var(--white);
+  --mdc-snackbar-supporting-text-color: var(--white);
 }
 
 .error-snackbar {
-  --mdc-snackbar-container-color: #991b1b;
+  --mdc-snackbar-container-color: color-mix(in srgb, var(--error-color) 45%, var(--primary-dark));
 }
 
 .info-snackbar {
-  --mdc-snackbar-container-color: #075985;
+  --mdc-snackbar-container-color: var(--primary-color);
 }
 
 .success-snackbar {
-  --mdc-snackbar-container-color: #166534;
+  --mdc-snackbar-container-color: color-mix(in srgb, var(--success-color) 40%, var(--primary-dark));
 }

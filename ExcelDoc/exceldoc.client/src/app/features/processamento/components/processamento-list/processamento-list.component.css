@@ -5,7 +5,7 @@
 
 .processing-workspace {
   min-width: 0;
-  color: #101828;
+  color: var(--primary-text);
 }
 
 .context-bar,
@@ -25,7 +25,7 @@
   justify-content: space-between;
   gap: 24px;
   padding: 0 2px 16px;
-  color: #475467;
+  color: var(--secondary-text);
   font-size: 0.78rem;
 }
 
@@ -35,23 +35,23 @@
   white-space: nowrap;
 }
 
-.breadcrumbs mat-icon,
-.context-count mat-icon {
-  width: 17px;
-  height: 17px;
-  font-size: 17px;
-}
+  .breadcrumbs mat-icon,
+  .context-count mat-icon {
+    width: 17px;
+    height: 17px;
+    font-size: 17px;
+  }
 
-.breadcrumbs > mat-icon:first-child {
-  color: #344054;
-}
+  .breadcrumbs > mat-icon:first-child {
+    color: var(--secondary-text);
+  }
 
 .breadcrumbs__separator {
-  color: #98a2b3;
+  color: var(--secondary-text);
 }
 
 .breadcrumbs strong {
-  color: #1d2939;
+  color: var(--primary-text);
   font-weight: 650;
 }
 
@@ -59,17 +59,17 @@
   gap: 6px;
   padding: 6px 10px;
   border-radius: 999px;
-  background: #eaf1ff;
-  color: #155eef;
+  background: var(--primary-light);
+  color: var(--primary-color);
   font-weight: 650;
 }
 
 .workspace-card {
   overflow: hidden;
-  border: 1px solid #dfe5ef;
+  border: 1px solid var(--border-color);
   border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 14px 38px rgba(16, 24, 40, 0.05);
+  background: var(--card-bg);
+  box-shadow: 0 14px 38px color-mix(in srgb, var(--primary-dark) 5%, transparent);
 }
 
 .workspace-header {
@@ -78,7 +78,7 @@
   align-items: flex-start;
   gap: 24px;
   padding: 26px;
-  border-bottom: 1px solid #e7ebf2;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .workspace-header__title-row {
@@ -91,8 +91,8 @@
 .empty-state__icon {
   display: grid;
   place-items: center;
-  background: #eaf1ff;
-  color: #155eef;
+  background: var(--primary-light);
+  color: var(--primary-color);
 }
 
 .workspace-header__icon {
@@ -108,7 +108,7 @@
 }
 
 .workspace-header h1 {
-  color: #0b1739;
+  color: var(--primary-text);
   font-size: clamp(1.55rem, 2vw, 2rem);
   font-weight: 750;
   letter-spacing: -0.035em;
@@ -117,7 +117,7 @@
 .workspace-header p {
   max-width: 640px;
   margin-top: 8px;
-  color: #667085;
+  color: var(--secondary-text);
   font-size: 0.82rem;
 }
 
@@ -164,7 +164,7 @@
 
 .processing-table {
   overflow: hidden;
-  border: 1px solid #e0e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 13px;
 }
 
@@ -175,17 +175,17 @@
 .processing-table__content {
   width: 100%;
   min-width: 1050px;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 :host ::ng-deep .processing-table__content .mat-mdc-header-row {
   height: 48px;
-  background: #f8faff;
+  background: var(--primary-light);
 }
 
 :host ::ng-deep .processing-table__content .mat-mdc-header-cell {
-  border-bottom-color: #e0e6ef;
-  color: #475467;
+  border-bottom-color: var(--border-color);
+  color: var(--secondary-text);
   font-size: 0.68rem;
   font-weight: 650;
   letter-spacing: 0.04em;
@@ -197,13 +197,13 @@
   transition: background 0.18s;
 }
 
-:host ::ng-deep .processing-table__content .mat-mdc-row:hover {
-  background: #f8faff;
-}
+  :host ::ng-deep .processing-table__content .mat-mdc-row:hover {
+    background: var(--primary-light);
+  }
 
 :host ::ng-deep .processing-table__content .mat-mdc-cell {
-  border-bottom-color: #edf0f5;
-  color: #344054;
+  border-bottom-color: var(--border-color);
+  color: var(--secondary-text);
   font-size: 0.8rem;
 }
 
@@ -219,23 +219,23 @@
   border-radius: 9px;
 }
 
-.file-cell__icon mat-icon {
-  width: 18px;
-  height: 18px;
-  font-size: 18px;
-}
+  .file-cell__icon mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
 
 .file-cell strong {
   overflow: hidden;
   max-width: 250px;
-  color: #1d2939;
+  color: var(--primary-text);
   font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .date-value {
-  color: #667085;
+  color: var(--secondary-text);
   white-space: nowrap;
 }
 
@@ -257,38 +257,38 @@
 }
 
 .status-sucesso {
-  border: 1px solid #d1fadf;
-  background: #ecfdf3;
-  color: #027a48;
+  border: 1px solid color-mix(in srgb, var(--success-color) 25%, var(--white));
+  background: color-mix(in srgb, var(--success-color) 12%, var(--white));
+  color: var(--primary-dark);
 }
 
 .status-erro {
-  border: 1px solid #fecdca;
-  background: #fef3f2;
-  color: #b42318;
+  border: 1px solid color-mix(in srgb, var(--error-color) 25%, var(--white));
+  background: color-mix(in srgb, var(--error-color) 10%, var(--white));
+  color: var(--primary-dark);
 }
 
 .status-processando {
-  border: 1px solid #b2ccff;
-  background: #f5f8ff;
-  color: #155eef;
+  border: 1px solid var(--border-color);
+  background: var(--primary-light);
+  color: var(--primary-color);
 }
 
 .metric {
-  color: #344054;
+  color: var(--secondary-text);
   font-weight: 650;
 }
 
 .metric--success {
-  color: #027a48;
+  color: var(--primary-dark);
 }
 
 .metric--error {
-  color: #b42318;
+  color: var(--primary-dark);
 }
 
 .metric--ignored {
-  color: #b54708;
+  color: var(--primary-dark);
 }
 
 .actions-cell {
@@ -296,16 +296,16 @@
   white-space: nowrap;
 }
 
-.actions-cell button {
-  min-height: 36px;
-  border-radius: 9px;
-  font-size: 0.73rem;
-}
+  .actions-cell button {
+    min-height: 36px;
+    border-radius: 9px;
+    font-size: 0.73rem;
+  }
 
 :host ::ng-deep .processing-table .mat-mdc-paginator {
-  border-top: 1px solid #e0e6ef;
-  background: #fbfcfe;
-  color: #667085;
+  border-top: 1px solid var(--border-color);
+  background: var(--secondary-bg);
+  color: var(--secondary-text);
 }
 
 .empty-state {
@@ -314,9 +314,9 @@
   place-items: center;
   align-content: center;
   gap: 10px;
-  border: 1px dashed #cfd8e6;
+  border: 1px dashed var(--border-color);
   border-radius: 13px;
-  background: #fbfcfe;
+  background: var(--secondary-bg);
   text-align: center;
 }
 
@@ -328,7 +328,7 @@
 
 .empty-state h2 {
   margin: 0;
-  color: #1d2939;
+  color: var(--primary-text);
   font-size: 1rem;
 }
 
@@ -362,10 +362,10 @@
     flex-direction: column;
   }
 
-  .filter-field,
-  .workspace-actions button {
-    width: 100%;
-  }
+    .filter-field,
+    .workspace-actions button {
+      width: 100%;
+    }
 
   .processing-panel {
     padding: 14px;

@@ -5,7 +5,7 @@
 
 .profile-form-workspace {
   min-width: 0;
-  color: #101828;
+  color: var(--primary-text);
 }
 
 .context-bar,
@@ -33,7 +33,7 @@
   justify-content: space-between;
   gap: 24px;
   padding: 0 2px 16px;
-  color: #667085;
+  color: var(--secondary-text);
   font-size: 0.78rem;
 }
 
@@ -51,14 +51,14 @@
   }
 
   .breadcrumbs strong {
-    color: #1d2939;
+    color: var(--primary-text);
     font-weight: 650;
   }
 
 .breadcrumbs__separator {
   width: 16px;
   height: 16px;
-  color: #98a2b3;
+  color: var(--secondary-text);
   font-size: 16px;
 }
 
@@ -66,7 +66,7 @@
   width: 32px;
   height: 32px;
   flex: 0 0 32px;
-  color: #475467;
+  color: var(--secondary-text);
 }
 
   .back-button mat-icon {
@@ -80,8 +80,8 @@
   gap: 6px;
   padding: 6px 10px;
   border-radius: 999px;
-  background: #f2f4f7;
-  color: #475467;
+  background: var(--secondary-bg);
+  color: var(--secondary-text);
   font-size: 0.7rem;
   font-weight: 650;
 }
@@ -94,10 +94,10 @@
 
 .workspace-card {
   overflow: hidden;
-  border: 1px solid #dfe5ef;
+  border: 1px solid var(--border-color);
   border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 14px 38px rgba(16, 24, 40, 0.05);
+  background: var(--card-bg);
+  box-shadow: 0 14px 38px color-mix(in srgb, var(--primary-dark) 5%, transparent);
 }
 
 .workspace-header {
@@ -105,7 +105,7 @@
   justify-content: space-between;
   gap: 24px;
   padding: 24px 26px 20px;
-  border-bottom: 1px solid #e7ebf2;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .workspace-header__copy {
@@ -120,8 +120,8 @@
   flex: 0 0 46px;
   place-items: center;
   border-radius: 12px;
-  background: #eaf1ff;
-  color: #155eef;
+  background: var(--primary-light);
+  color: var(--primary-color);
 }
 
 .workspace-header__title-row {
@@ -135,7 +135,7 @@
 }
 
 .workspace-header h1 {
-  color: #0b1739;
+  color: var(--primary-text);
   font-size: clamp(1.45rem, 2vw, 1.85rem);
   font-weight: 750;
   letter-spacing: -0.03em;
@@ -143,7 +143,7 @@
 
 .workspace-header p {
   margin-top: 6px;
-  color: #667085;
+  color: var(--secondary-text);
   font-size: 0.82rem;
 }
 
@@ -151,8 +151,8 @@
   gap: 5px;
   padding: 5px 8px;
   border-radius: 999px;
-  background: #f4f3ff;
-  color: #5925dc;
+  background: var(--primary-light);
+  color: var(--primary-color);
   font-size: 0.66rem;
   font-weight: 650;
 }
@@ -189,22 +189,22 @@
   display: grid;
   gap: 18px;
   padding: 22px 26px 26px;
-  background: #fbfcfe;
+  background: var(--secondary-bg);
 }
 
 .form-panel {
   overflow: hidden;
-  border: 1px solid #e0e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 13px;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .form-panel__header {
   min-height: 72px;
   gap: 11px;
   padding: 14px 16px;
-  border-bottom: 1px solid #e7ebf2;
-  background: #fbfcfe;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--secondary-bg);
 }
 
   .form-panel__header > span {
@@ -214,8 +214,8 @@
     flex: 0 0 34px;
     place-items: center;
     border-radius: 9px;
-    background: #eaf1ff;
-    color: #155eef;
+    background: var(--primary-light);
+    color: var(--primary-color);
   }
 
     .form-panel__header > span mat-icon {
@@ -235,14 +235,14 @@
   }
 
   .form-panel__header h2 {
-    color: #1d2939;
+    color: var(--primary-text);
     font-size: 0.86rem;
     font-weight: 650;
   }
 
   .form-panel__header p {
     margin-top: 3px;
-    color: #667085;
+    color: var(--secondary-text);
     font-size: 0.68rem;
   }
 
@@ -268,7 +268,7 @@ mat-form-field {
 
 :host ::ng-deep .form-panel .mat-mdc-form-field-icon-prefix {
   padding: 0 10px 0 0;
-  color: #8091ab;
+  color: var(--secondary-text);
 }
 
   :host ::ng-deep .form-panel .mat-mdc-form-field-icon-prefix mat-icon {
@@ -284,28 +284,28 @@ mat-form-field {
   flex: 0 0 auto;
   place-items: center;
   border-radius: 999px;
-  background: #eef4ff;
-  color: #155eef;
+  background: var(--primary-light);
+  color: var(--primary-color);
   font-size: 0.68rem;
 }
 
 .collection-structure {
   display: grid;
   gap: 16px;
-  background: #fbfcfe;
+  background: var(--secondary-bg);
 }
 
 .collection-section {
   overflow: hidden;
-  border: 1px solid #e0e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 11px;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .collection-section__header {
   padding: 14px 16px;
-  border-bottom: 1px solid #edf0f5;
-  background: #f8faff;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--primary-light);
 }
 
 .section-identity {
@@ -320,13 +320,13 @@ mat-form-field {
   flex: 0 0 34px;
   place-items: center;
   border-radius: 9px;
-  background: #ecfdf3;
-  color: #039855;
+  background: color-mix(in srgb, var(--success-color) 12%, var(--white));
+  color: var(--primary-dark);
 }
 
 .type-icon--header {
-  background: #eaf1ff;
-  color: #155eef;
+  background: var(--primary-light);
+  color: var(--primary-color);
 }
 
 .type-icon mat-icon {
@@ -346,28 +346,28 @@ mat-form-field {
   }
 
   .section-title-row h3 {
-    color: #1d2939;
+    color: var(--primary-text);
     font-size: 0.82rem;
   }
 
 .section-identity p {
   margin-top: 3px;
-  color: #667085;
+  color: var(--secondary-text);
   font-size: 0.68rem;
 }
 
 .type-chip {
   padding: 4px 7px;
   border-radius: 999px;
-  background: #ecfdf3;
-  color: #027a48;
+  background: color-mix(in srgb, var(--success-color) 12%, var(--white));
+  color: var(--primary-dark);
   font-size: 0.62rem;
   font-weight: 650;
 }
 
 .type-chip--header {
-  background: #eaf1ff;
-  color: #155eef;
+  background: var(--primary-light);
+  color: var(--primary-color);
 }
 
 .collection-fields {
@@ -383,16 +383,16 @@ mat-form-field {
 
 .line-card {
   overflow: hidden;
-  border: 1px solid #e0e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 10px;
-  background: #fbfcfe;
+  background: var(--secondary-bg);
   transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
 }
 
 .line-card--selected {
-  border-color: #84adff;
-  background: #f5f8ff;
-  box-shadow: 0 0 0 1px rgba(21, 94, 239, 0.05);
+  border-color: var(--field-border-focus);
+  background: var(--primary-light);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 5%, transparent);
 }
 
 .line-card__header {
@@ -400,8 +400,8 @@ mat-form-field {
   justify-content: space-between;
   gap: 10px;
   padding: 10px 12px;
-  border-bottom: 1px solid #e7ebf2;
-  background: #fff;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--card-bg);
 }
 
 .line-card__checkbox {
@@ -411,7 +411,7 @@ mat-form-field {
 
 :host ::ng-deep .line-card__checkbox .mdc-label {
   overflow: hidden;
-  color: #1d2939;
+  color: var(--primary-text);
   font-size: 0.76rem;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -422,14 +422,14 @@ mat-form-field {
   gap: 4px;
   padding: 5px 7px;
   border-radius: 999px;
-  background: #f2f4f7;
-  color: #667085;
+  background: var(--secondary-bg);
+  color: var(--secondary-text);
   font-size: 0.6rem;
 }
 
 .status-chip--selected {
-  background: #ecfdf3;
-  color: #027a48;
+  background: color-mix(in srgb, var(--success-color) 12%, var(--white));
+  color: var(--primary-dark);
 }
 
 .status-chip mat-icon {
@@ -451,9 +451,9 @@ mat-form-field {
   align-content: center;
   gap: 8px;
   margin: 18px 16px;
-  border: 1px dashed #cfd8e6;
+  border: 1px dashed var(--border-color);
   border-radius: 11px;
-  background: #fbfcfe;
+  background: var(--secondary-bg);
   text-align: center;
 }
 
@@ -463,8 +463,8 @@ mat-form-field {
     display: grid;
     place-items: center;
     border-radius: 13px;
-    background: #eef4ff;
-    color: #155eef;
+    background: var(--primary-light);
+    color: var(--primary-color);
   }
 
   .collections-empty h3,
@@ -473,13 +473,13 @@ mat-form-field {
   }
 
   .collections-empty h3 {
-    color: #1d2939;
+    color: var(--primary-text);
     font-size: 0.9rem;
   }
 
   .collections-empty p {
     max-width: 480px;
-    color: #667085;
+    color: var(--secondary-text);
     font-size: 0.74rem;
   }
 
@@ -487,15 +487,15 @@ mat-form-field {
   justify-content: space-between;
   gap: 20px;
   padding: 14px 16px;
-  border: 1px solid #e0e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 11px;
-  background: #fff;
+  background: var(--card-bg);
 }
 
   .form-footer > span {
     min-width: 0;
     gap: 7px;
-    color: #667085;
+    color: var(--secondary-text);
     font-size: 0.7rem;
   }
 
@@ -503,7 +503,7 @@ mat-form-field {
       width: 16px;
       height: 16px;
       flex: 0 0 16px;
-      color: #8091ab;
+      color: var(--secondary-text);
       font-size: 16px;
     }
 

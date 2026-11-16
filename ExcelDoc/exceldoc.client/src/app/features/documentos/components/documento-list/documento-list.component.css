@@ -5,7 +5,7 @@
 
 .documents-workspace {
   min-width: 0;
-  color: #101828;
+  color: var(--primary-text);
 }
 
 .context-bar,
@@ -26,7 +26,7 @@
   justify-content: space-between;
   gap: 24px;
   padding: 0 2px 16px;
-  color: #475467;
+  color: var(--secondary-text);
   font-size: 0.78rem;
 }
 
@@ -51,15 +51,15 @@
   }
 
   .breadcrumbs > mat-icon:first-child {
-    color: #344054;
+    color: var(--secondary-text);
   }
 
 .breadcrumbs__separator {
-  color: #98a2b3;
+  color: var(--secondary-text);
 }
 
 .breadcrumbs strong {
-  color: #1d2939;
+  color: var(--primary-text);
   font-weight: 650;
 }
 
@@ -67,8 +67,8 @@
   gap: 6px;
   padding: 6px 10px;
   border-radius: 999px;
-  background: #eaf1ff;
-  color: #155eef;
+  background: var(--primary-light);
+  color: var(--primary-color);
   font-weight: 650;
 }
 
@@ -80,10 +80,10 @@
 
 .workspace-card {
   overflow: hidden;
-  border: 1px solid #dfe5ef;
+  border: 1px solid var(--border-color);
   border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 14px 38px rgba(16, 24, 40, 0.05);
+  background: var(--card-bg);
+  box-shadow: 0 14px 38px color-mix(in srgb, var(--primary-dark) 5%, transparent);
 }
 
 .workspace-header {
@@ -92,7 +92,7 @@
   align-items: flex-start;
   gap: 24px;
   padding: 26px;
-  border-bottom: 1px solid #e7ebf2;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .workspace-header__copy {
@@ -109,8 +109,8 @@
 .empty-state__icon {
   display: grid;
   place-items: center;
-  background: #eaf1ff;
-  color: #155eef;
+  background: var(--primary-light);
+  color: var(--primary-color);
 }
 
 .workspace-header__icon {
@@ -122,7 +122,7 @@
 
 .workspace-header h1 {
   margin: 0;
-  color: #0b1739;
+  color: var(--primary-text);
   font-size: clamp(1.55rem, 2vw, 2rem);
   font-weight: 750;
   letter-spacing: -0.035em;
@@ -130,7 +130,7 @@
 
 .workspace-header p {
   margin: 8px 0 0;
-  color: #667085;
+  color: var(--secondary-text);
   font-size: 0.88rem;
 }
 
@@ -158,10 +158,10 @@
   gap: 10px;
   margin-bottom: 16px;
   padding: 12px 14px;
-  border: 1px solid #fecdca;
+  border: 1px solid color-mix(in srgb, var(--error-color) 25%, var(--white));
   border-radius: 10px;
-  background: #fef3f2;
-  color: #b42318;
+  background: color-mix(in srgb, var(--error-color) 10%, var(--white));
+  color: var(--primary-dark);
   font-size: 0.8rem;
 }
 
@@ -177,9 +177,9 @@
 
 .document-table {
   overflow: hidden;
-  border: 1px solid #e0e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 13px;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .table-wrapper {
@@ -194,12 +194,12 @@
 
 :host ::ng-deep .document-table__content .mat-mdc-header-row {
   height: 48px;
-  background: #f8faff;
+  background: var(--secondary-bg);
 }
 
 :host ::ng-deep .document-table__content .mat-mdc-header-cell {
-  border-bottom-color: #e0e6ef;
-  color: #475467;
+  border-bottom-color: var(--border-color);
+  color: var(--secondary-text);
   font-size: 0.7rem;
   font-weight: 650;
   letter-spacing: 0.04em;
@@ -212,12 +212,12 @@
 }
 
   :host ::ng-deep .document-table__content .mat-mdc-row:hover {
-    background: #f8faff;
+    background: var(--secondary-bg);
   }
 
 :host ::ng-deep .document-table__content .mat-mdc-cell {
-  border-bottom-color: #edf0f5;
-  color: #344054;
+  border-bottom-color: var(--border-color);
+  color: var(--secondary-text);
 }
 
 .document-name {
@@ -238,7 +238,7 @@
   }
 
 .document-name strong {
-  color: #1d2939;
+  color: var(--primary-text);
   font-size: 0.83rem;
   font-weight: 650;
 }
@@ -247,7 +247,7 @@
   display: inline-block;
   max-width: 420px;
   overflow: hidden;
-  color: #667085;
+  color: var(--secondary-text);
   font-size: 0.8rem;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -269,9 +269,9 @@
   }
 
 :host ::ng-deep .document-table .mat-mdc-paginator {
-  border-top: 1px solid #e0e6ef;
-  background: #fbfcfe;
-  color: #667085;
+  border-top: 1px solid var(--border-color);
+  background: var(--secondary-bg);
+  color: var(--secondary-text);
 }
 
 .empty-state {
@@ -280,9 +280,9 @@
   place-items: center;
   align-content: center;
   gap: 9px;
-  border: 1px dashed #cfd8e6;
+  border: 1px dashed var(--border-color);
   border-radius: 13px;
-  background: #fbfcfe;
+  background: var(--secondary-bg);
   text-align: center;
 }
 
@@ -305,13 +305,13 @@
 }
 
 .empty-state h2 {
-  color: #1d2939;
+  color: var(--primary-text);
   font-size: 1rem;
 }
 
 .empty-state p {
   max-width: 520px;
-  color: #667085;
+  color: var(--secondary-text);
   font-size: 0.82rem;
 }
 

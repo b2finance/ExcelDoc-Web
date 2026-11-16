@@ -8,12 +8,12 @@
   display: grid;
   grid-template-columns: 72px minmax(0, 1fr);
   align-items: start;
-  background: #f8fafc;
+  background: var(--secondary-bg);
 }
 
 .auth-shell {
   min-height: 100vh;
-  background: #f4f8fa;
+  background: var(--primary-bg);
 }
 
 .auth-shell__content {
@@ -33,9 +33,9 @@
   justify-content: flex-end;
   min-height: 3.5rem;
   border-radius: 0;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-color);
   padding: 0.375rem 1.25rem;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--card-bg);
   box-shadow: none;
   position: sticky;
   top: 0;
@@ -59,11 +59,11 @@
 
   .topbar__session-item span {
     font-size: 0.75rem;
-    color: #64748b;
+    color: var(--secondary-text);
   }
 
   .topbar__session-item strong {
-    color: #0f172a;
+    color: var(--primary-text);
     font-size: 0.85rem;
     font-weight: 600;
   }
@@ -76,7 +76,7 @@
   min-width: 0;
   border-radius: 0;
   padding: 1rem;
-  background: #f8fafc;
+  background: var(--content-bg);
   box-shadow: none;
 }
 
