@@ -188,6 +188,48 @@ public sealed class SapServiceLayerClient : ISapServiceLayerClient, IDisposable
         }
     }
 
+    public async Task<bool> IsSuperuserAsync(SapSessionContext session, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        cancellationToken.ThrowIfCancellationRequested();
+        var filter = Uri.EscapeDataString($"UserCode eq {SapOData.String(session.UserName)}");
+        string body;
+        try
+        {
+            body = await session.GetRequiredConnection()
+                .Request($"Users?$select=UserCode,Superuser&$filter={filter}")
+                .WithTimeout(session.RequestTimeoutSeconds)
+                .GetStringAsync();
+            session.RenewExpiration();
+        }
+        catch (Exception exception) when (SapServiceLayerErrors.IsServiceLayerException(exception))
+        {
+            var error = await SapServiceLayerErrors.ReadAsync(exception);
+            SapServiceLayerErrors.UpdateSessionExpiration(session, error.StatusCode);
+            throw SapServiceLayerErrors.CreateException(error, exception,
+                _messageService.Get(MessageKeys.SapServiceLayerOperationFailed),
+                _messageService.Get(MessageKeys.SapSessionExpired));
+        }
+
+        using var document = JsonDocument.Parse(body);
+        return ParseSuperuser(document.RootElement, session.UserName);
+    }
+
+    internal static bool ParseSuperuser(JsonElement root, string userName)
+    {
+        if (root.ValueKind != JsonValueKind.Object || !root.TryGetProperty("value", out var users) || users.ValueKind != JsonValueKind.Array)
+            throw new InvalidOperationException("Resposta de usuários do SAP inválida.");
+        var matches = users.EnumerateArray().Where(user =>
+            user.ValueKind == JsonValueKind.Object && user.TryGetProperty("UserCode", out var code) &&
+            code.ValueKind == JsonValueKind.String &&
+            string.Equals(code.GetString(), userName, StringComparison.OrdinalIgnoreCase)).ToArray();
+        if (matches.Length != 1 || !matches[0].TryGetProperty("Superuser", out var superuser) ||
+            superuser.ValueKind != JsonValueKind.String ||
+            (superuser.GetString() != "tYES" && superuser.GetString() != "tNO"))
+            throw new InvalidOperationException("Não foi possível confirmar se o usuário SAP é superusuário.");
+        return superuser.GetString() == "tYES";
+    }
+
     public async Task<IReadOnlyDictionary<string, int>> GetNFModelsAsync(
         SapSessionContext session,
         CancellationToken cancellationToken = default)

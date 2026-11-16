@@ -147,6 +147,7 @@ public sealed class ProcessingMetricsTests
     }
     private sealed class SapClient : ISapServiceLayerClient
     {
+        public Task<bool> IsSuperuserAsync(SapSessionContext session, CancellationToken cancellationToken = default) => Task.FromResult(true);
         public IReadOnlyDictionary<string, int> Models = new Dictionary<string, int>();
         public int ModelCalls;
         public List<int> SentModels { get; } = [];

@@ -34,7 +34,7 @@ public sealed class AuthServiceAuthorizationTests
                 ? TipoUsuario.Administrador.ToString()
                 : TipoUsuario.Usuario.ToString(),
             result.TipoUsuario);
-        Assert.Equal(expectedAdministrator, fixture.Initializer.AllowSchemaCreation);
+        Assert.True(fixture.Initializer.Initialized);
         Assert.Equal("SBODEMO_BR", fixture.Client.Database);
         Assert.Equal(userName, fixture.Client.UserName);
         Assert.Equal(fixture.Client.Session.SessionKey, fixture.Accessor.SessionKey);
@@ -55,7 +55,7 @@ public sealed class AuthServiceAuthorizationTests
 
         Assert.Contains("configurada", exception.Message, StringComparison.OrdinalIgnoreCase);
         Assert.Equal(0, fixture.Client.LoginCalls);
-        Assert.Null(fixture.Initializer.AllowSchemaCreation);
+        Assert.False(fixture.Initializer.Initialized);
     }
 
     [Theory]
@@ -68,7 +68,7 @@ public sealed class AuthServiceAuthorizationTests
         {
             Database = "SBODEMO_BR", Login = userName, Senha = "secret"
         }));
-        Assert.Null(fixture.Initializer.AllowSchemaCreation);
+        Assert.False(fixture.Initializer.Initialized);
         Assert.Null(fixture.Accessor.SessionKey);
         Assert.False(fixture.Store.TryGet(fixture.Client.Session.SessionKey, out _));
         Assert.Equal(1, fixture.Client.LogoutCalls);
@@ -129,20 +129,20 @@ public sealed class AuthServiceAuthorizationTests
 
     private sealed class RecordingDatabaseInitializer : ISapDatabaseInitializer
     {
-        public bool? AllowSchemaCreation { get; private set; }
+        public bool Initialized { get; private set; }
 
         public Task InitializeAsync(
             SapSessionContext session,
-            bool allowSchemaCreation,
             CancellationToken cancellationToken = default)
         {
-            AllowSchemaCreation = allowSchemaCreation;
+            Initialized = true;
             return Task.CompletedTask;
         }
     }
 
     private sealed class RecordingSapServiceLayerClient : ISapServiceLayerClient
     {
+        public Task<bool> IsSuperuserAsync(SapSessionContext session, CancellationToken cancellationToken = default) => Task.FromResult(true);
         public Task<IReadOnlyDictionary<string, int>> GetNFModelsAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public int LogoutCalls { get; private set; }
 

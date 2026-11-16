@@ -103,7 +103,6 @@ public sealed class AuthService : IAuthService
 
             await _databaseInitializer.InitializeAsync(
                 session,
-                isAdministrator,
                 cancellationToken);
         }
         catch

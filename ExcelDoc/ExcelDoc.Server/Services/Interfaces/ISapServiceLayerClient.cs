@@ -4,6 +4,8 @@ namespace ExcelDoc.Server.Services.Interfaces
 {
     public interface ISapServiceLayerClient
     {
+        Task<bool> IsSuperuserAsync(SapSessionContext session, CancellationToken cancellationToken = default);
+
         Task<string> GetInstallationNumberAsync(
             SapSessionContext session,
             CancellationToken cancellationToken = default);

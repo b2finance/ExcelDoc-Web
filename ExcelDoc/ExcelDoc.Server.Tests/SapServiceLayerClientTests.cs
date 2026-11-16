@@ -7,6 +7,22 @@ namespace ExcelDoc.Server.Tests;
 
 public sealed class SapServiceLayerClientTests
 {
+    [Theory]
+    [InlineData("tYES", true)]
+    [InlineData("tNO", false)]
+    public void ParseSuperuser_ReadsSapStatus(string status, bool expected)
+    {
+        using var document = JsonDocument.Parse($$"""{ "value": [{ "UserCode": "alice", "Superuser": "{{status}}" }] }""");
+        Assert.Equal(expected, SapServiceLayerClient.ParseSuperuser(document.RootElement, "alice"));
+    }
+
+    [Fact]
+    public void ParseSuperuser_RejectsMissingStatus()
+    {
+        using var document = JsonDocument.Parse("{\"value\":[{\"UserCode\":\"alice\"}]}");
+        Assert.Throws<InvalidOperationException>(() => SapServiceLayerClient.ParseSuperuser(document.RootElement, "alice"));
+    }
+
     [Fact]
     public void AddNFModels_SkipsUnnamedEntriesAndReadsStringCodesAcrossPages()
     {

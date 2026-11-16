@@ -3,12 +3,34 @@ using System.Text.RegularExpressions;
 using ExcelDoc.Server.Models;
 using ExcelDoc.Server.Sap;
 using ExcelDoc.Server.Services;
+using ExcelDoc.Server.Services.Interfaces;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace ExcelDoc.Server.Tests;
 
 public sealed class SapDatabaseInitializerTests
 {
+    private sealed class TestSapClient(bool isSuperuser) : ISapServiceLayerClient
+    {
+        public int Checks { get; private set; }
+        public Task<bool> IsSuperuserAsync(SapSessionContext session, CancellationToken cancellationToken = default) { Checks++; return Task.FromResult(isSuperuser); }
+        public Task<string> GetInstallationNumberAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<SapSessionContext> LoginAsync(string database, string userName, string password, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task LogoutAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<string> PostProcessamentoAsync(SapSessionContext session, string endpoint, object payload, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<IReadOnlyDictionary<string, int>> GetNFModelsAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+    }
+
+    [Fact]
+    public async Task InitializeAsync_RequiresSapSuperuserEvenForAdministrator()
+    {
+        var client = new TestSapClient(false);
+        var initializer = new SapDatabaseInitializer(NullLogger<SapDatabaseInitializer>.Instance, new SapSchemaInstaller(null!), new InMemoryUdtStore(), client);
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => initializer.InitializeAsync(new SapSessionContext { Database = "test" }));
+        Assert.Contains("superusuário", exception.Message);
+        Assert.Equal(1, client.Checks);
+    }
+
     [Fact]
     public async Task InitializeAsync_UpgradesDefaultMappingsFromUpdatedSpreadsheetWithoutDuplicates()
     {
@@ -65,15 +87,16 @@ public sealed class SapDatabaseInitializerTests
         var initializer = new SapDatabaseInitializer(
             NullLogger<SapDatabaseInitializer>.Instance,
             new SapSchemaInstaller(null!),
-            store);
+            store,
+            new TestSapClient(true));
         var session = new SapSessionContext
         {
             ServiceLayerBaseUrl = "https://sap.example.test:50000/b1s/v1/",
             Database = "SBOTEST"
         };
 
-        await initializer.InitializeAsync(session, allowSchemaCreation: true);
-        await initializer.InitializeAsync(session, allowSchemaCreation: true);
+        await initializer.InitializeAsync(session);
+        await initializer.InitializeAsync(session);
 
         var mapping = Assert.Single(
             store.Rows(SapUdtSchema.Mapeamento),

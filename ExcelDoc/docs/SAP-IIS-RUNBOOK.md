@@ -116,9 +116,9 @@ requisições são bloqueadas e o logout na Service Layer é concluído ao liber
 
 Libere somente o tráfego necessário do servidor IIS para o host/porta HTTPS da Service Layer. Não exponha o HANA diretamente.
 
-O provisionamento de UDTs/UDFs e chaves ocorre via Service Layer e requer usuário SAP autorizado a alterar metadados. A função de administrador do ExcelDoc não amplia permissões no SAP: `manager` e `Support` ainda precisam das autorizações SAP necessárias.
+O provisionamento de UDTs/UDFs e chaves ocorre via Service Layer e requer um superusuário SAP autorizado a alterar metadados. A função de administrador do ExcelDoc continua restrita a `manager` e `Support` e não amplia permissões no SAP.
 
-No primeiro login administrativo, o sistema cria as UDTs `bott_MasterData`,
+No primeiro login de um superusuário SAP, o sistema cria as UDTs `bott_MasterData`,
 registra os UDOs `boud_MasterData`, adiciona UDFs/chaves únicas e grava a versão
 do esquema. Os dados padrão são inseridos apenas quando ausentes e não são
 sobrescritos nos logins seguintes.

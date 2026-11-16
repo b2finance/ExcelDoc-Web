@@ -170,20 +170,22 @@ public sealed class SapDatabaseInitializer : ISapDatabaseInitializer
     private readonly ILogger<SapDatabaseInitializer> _logger;
     private readonly SapSchemaInstaller _schemaInstaller;
     private readonly ISapUdtStore _store;
+    private readonly ISapServiceLayerClient _sapClient;
 
     public SapDatabaseInitializer(
         ILogger<SapDatabaseInitializer> logger,
         SapSchemaInstaller schemaInstaller,
-        ISapUdtStore store)
+        ISapUdtStore store,
+        ISapServiceLayerClient sapClient)
     {
         _logger = logger;
         _schemaInstaller = schemaInstaller;
         _store = store;
+        _sapClient = sapClient;
     }
 
     public async Task InitializeAsync(
         SapSessionContext session,
-        bool allowSchemaCreation,
         CancellationToken cancellationToken = default)
     {
         var lockKey = $"{session.ServiceLayerBaseUrl}\n{session.Database}";
@@ -196,7 +198,6 @@ public sealed class SapDatabaseInitializer : ISapDatabaseInitializer
         {
             await InitializeCoreAsync(
                 session,
-                allowSchemaCreation,
                 cancellationToken);
         }
         finally
@@ -207,7 +208,6 @@ public sealed class SapDatabaseInitializer : ISapDatabaseInitializer
 
     private async Task InitializeCoreAsync(
         SapSessionContext session,
-        bool allowSchemaCreation,
         CancellationToken cancellationToken)
     {
         var installationState = await TryGetInstallationStateAsync(cancellationToken);
@@ -225,13 +225,14 @@ public sealed class SapDatabaseInitializer : ISapDatabaseInitializer
                 "A base foi preparada por uma versão mais nova do ExcelDoc.");
         }
 
-        if (!allowSchemaCreation &&
-            (installedSchemaVersion < CurrentSchemaVersion ||
-             installedSeedVersion < CurrentSeedVersion))
+        var allowSchemaCreation = installedSchemaVersion < CurrentSchemaVersion ||
+            installedSeedVersion < CurrentSeedVersion;
+        if (allowSchemaCreation)
         {
-            throw new InvalidOperationException(
-                "A estrutura do ExcelDoc ainda não foi instalada ou atualizada nesta base. " +
-                "Entre primeiro como manager ou Support.");
+            if (!await _sapClient.IsSuperuserAsync(session, cancellationToken))
+                throw new InvalidOperationException(
+                    "A estrutura do ExcelDoc ainda não foi instalada ou atualizada nesta base. " +
+                    "Entre com um superusuário do SAP Business One.");
         }
 
         if (allowSchemaCreation)
