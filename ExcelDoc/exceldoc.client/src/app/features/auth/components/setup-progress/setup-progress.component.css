@@ -1,0 +1,528 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.setup-screen {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.25rem, 4vw, 3rem);
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--primary-color) 7%, transparent), transparent 52%), linear-gradient(color-mix(in srgb, var(--primary-color) 4%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--primary-color) 4%, transparent) 1px, transparent 1px), var(--secondary-bg);
+  background-size: auto, 2rem 2rem, 2rem 2rem, auto;
+}
+
+.setup-header {
+  position: absolute;
+  top: clamp(1.5rem, 4vw, 2.75rem);
+  display: flex;
+  width: min(100%, 960px);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.setup-brand img {
+  display: block;
+  width: clamp(8rem, 16vw, 11rem);
+  height: auto;
+}
+
+.setup-header__label,
+.setup-footer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--secondary-text);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.setup-header__dot,
+.workbook__live span {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 50%;
+  background: var(--accent-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 12%, transparent);
+}
+
+.setup-card {
+  width: min(100%, 860px);
+  margin: 4rem 0 2.75rem;
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+  border: 1px solid var(--border-color);
+  border-radius: 1.25rem;
+  background: var(--card-bg);
+  box-shadow: 0 24px 70px color-mix(in srgb, var(--primary-dark) 9%, transparent);
+}
+
+.setup-card__intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.15rem;
+  margin-bottom: 1.75rem;
+}
+
+.setup-icon {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  width: 3.1rem;
+  height: 3.1rem;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 12%, transparent);
+  border-radius: 0.9rem;
+  color: var(--primary-color);
+  background: var(--primary-light);
+}
+
+  .setup-icon mat-icon {
+    width: 1.6rem;
+    height: 1.6rem;
+    font-size: 1.6rem;
+  }
+
+.setup-icon__spark {
+  position: absolute;
+  width: 0.42rem;
+  height: 0.42rem;
+  border: 2px solid var(--card-bg);
+  border-radius: 50%;
+  background: var(--accent-color);
+}
+
+.setup-icon__spark--one {
+  top: -0.12rem;
+  right: -0.12rem;
+}
+
+.setup-icon__spark--two {
+  bottom: 0.05rem;
+  left: -0.14rem;
+  background: var(--success-color);
+}
+
+.setup-copy {
+  min-width: 0;
+}
+
+.setup-eyebrow {
+  display: block;
+  margin: 0 0 0.45rem;
+  color: var(--accent-color);
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.setup-copy h1 {
+  margin: 0;
+  color: var(--primary-text);
+  font-size: clamp(1.45rem, 3vw, 1.9rem);
+  font-weight: 750;
+  letter-spacing: -0.025em;
+}
+
+.setup-copy p {
+  max-width: 660px;
+  margin: 0.55rem 0 0;
+  color: var(--secondary-text);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.workbook {
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  background: var(--white);
+}
+
+.workbook__topbar {
+  display: flex;
+  min-height: 3.7rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--secondary-bg) 65%, var(--white));
+}
+
+.workbook__app-icon {
+  display: grid;
+  width: 2.2rem;
+  height: 2.2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.55rem;
+  color: var(--white);
+  background: var(--primary-color);
+}
+
+  .workbook__app-icon mat-icon {
+    font-size: 1.2rem;
+  }
+
+.workbook__file {
+  display: grid;
+  gap: 0.12rem;
+}
+
+  .workbook__file strong {
+    color: var(--primary-text);
+    font-size: 0.8rem;
+  }
+
+  .workbook__file span {
+    color: var(--secondary-text);
+    font-size: 0.68rem;
+  }
+
+.workbook__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  color: var(--secondary-text);
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+  .workbook__live span {
+    width: 0.38rem;
+    height: 0.38rem;
+  }
+
+.workbook__viewport {
+  overflow-x: auto;
+}
+
+.workbook__table {
+  width: 100%;
+  min-width: 590px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  color: var(--primary-text);
+  font-size: 0.76rem;
+}
+
+  .workbook__table th,
+  .workbook__table td {
+    height: 2.25rem;
+    padding: 0.45rem 0.7rem;
+    overflow: hidden;
+    border-right: 1px solid color-mix(in srgb, var(--primary-color) 8%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--primary-color) 8%, transparent);
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .workbook__table th {
+    height: 2rem;
+    background: color-mix(in srgb, var(--secondary-bg) 75%, var(--white));
+    color: var(--secondary-text);
+    font-size: 0.66rem;
+    font-weight: 700;
+  }
+
+    .workbook__table th:nth-child(2) {
+      width: 25%;
+    }
+
+    .workbook__table th:nth-child(3) {
+      width: 23%;
+    }
+
+    .workbook__table th:nth-child(4) {
+      width: 40%;
+    }
+
+  .workbook__table .workbook__index {
+    width: 2.5rem;
+    padding-inline: 0.5rem;
+    background: color-mix(in srgb, var(--secondary-bg) 75%, var(--white));
+    color: var(--secondary-text);
+    text-align: center;
+  }
+
+  .workbook__table tbody tr:nth-child(even) {
+    background: color-mix(in srgb, var(--secondary-bg) 45%, var(--white));
+  }
+
+  .workbook__table tbody tr.workbook__row--active {
+    background: color-mix(in srgb, var(--accent-color) 7%, var(--white));
+  }
+
+    .workbook__table tbody tr.workbook__row--active td:nth-child(2) {
+      box-shadow: inset 3px 0 var(--accent-color);
+    }
+
+  .workbook__table code {
+    color: var(--primary-color);
+    font-family: 'Roboto Mono', Consolas, monospace;
+    font-size: 0.7rem;
+  }
+
+.workbook__description {
+  color: var(--secondary-text);
+}
+
+.workbook__tabbar {
+  display: flex;
+  min-height: 2.7rem;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0.65rem;
+  border-top: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--secondary-bg) 55%, var(--white));
+}
+
+.workbook__tab {
+  display: inline-flex;
+  height: 2.2rem;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0 0.65rem;
+  border-radius: 0.35rem 0.35rem 0 0;
+  color: var(--secondary-text);
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+  .workbook__tab mat-icon {
+    width: 0.95rem;
+    height: 0.95rem;
+    font-size: 0.95rem;
+  }
+
+.workbook__tab--active {
+  border-bottom: 2px solid var(--accent-color);
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+.workbook__tabbar-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+  color: var(--secondary-text);
+  font-size: 0.65rem;
+  white-space: nowrap;
+}
+
+  .workbook__tabbar-note mat-icon {
+    width: 0.9rem;
+    height: 0.9rem;
+    font-size: 0.9rem;
+    animation: setup-rotate 2.4s linear infinite;
+  }
+
+.setup-progress {
+  margin-top: 1.55rem;
+}
+
+.setup-progress__label {
+  display: flex;
+  min-height: 1.45rem;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--primary-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.setup-spinner {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: 0 0 auto;
+  border: 2px solid color-mix(in srgb, var(--primary-color) 14%, transparent);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: setup-rotate 0.8s linear infinite;
+}
+
+.setup-progress__wait {
+  margin-left: auto;
+  color: var(--secondary-text);
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
+.setup-progress__track {
+  position: relative;
+  height: 0.42rem;
+  margin-top: 0.7rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary-color) 9%, var(--white));
+}
+
+  .setup-progress__track span {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -35%;
+    width: 35%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    animation: setup-progress 2.2s ease-in-out infinite;
+  }
+
+.setup-progress > p {
+  margin: 0.7rem 0 0;
+  color: var(--secondary-text);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.setup-footer {
+  position: absolute;
+  bottom: clamp(1.25rem, 3vw, 2rem);
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
+  .setup-footer mat-icon {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: var(--primary-color);
+    font-size: 0.95rem;
+  }
+
+.setup-error-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.setup-error-icon {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  margin-bottom: 0.25rem;
+  border-radius: 0.85rem;
+  color: var(--error-color);
+  background: color-mix(in srgb, var(--error-color) 10%, var(--white));
+}
+
+  .setup-error-icon mat-icon {
+    width: 1.6rem;
+    height: 1.6rem;
+    font-size: 1.6rem;
+  }
+
+.setup-error-card .setup-eyebrow {
+  margin-bottom: 0;
+}
+
+.setup-error-card h1 {
+  margin: 0;
+  color: var(--primary-text);
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+}
+
+.setup-error-card p {
+  margin: 0.1rem 0 0.6rem;
+  color: var(--secondary-text);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.setup-error-card button {
+  min-height: 2.8rem;
+  border-radius: 0.6rem;
+}
+
+@keyframes setup-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes setup-progress {
+  0% {
+    left: -35%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .setup-screen {
+    justify-content: flex-start;
+    padding: 5rem 1rem 3.5rem;
+  }
+
+  .setup-header {
+    top: 1.2rem;
+  }
+
+  .setup-brand img {
+    width: 7.5rem;
+  }
+
+  .setup-header__label {
+    font-size: 0.68rem;
+  }
+
+  .setup-card {
+    margin: 1.5rem 0;
+    padding: 1.25rem 1rem;
+    border-radius: 1rem;
+  }
+
+  .setup-card__intro {
+    gap: 0.8rem;
+  }
+
+  .setup-icon {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .setup-copy p {
+    font-size: 0.84rem;
+  }
+
+  .workbook__topbar {
+    padding-inline: 0.65rem;
+  }
+
+  .workbook__tabbar-note {
+    display: none;
+  }
+
+  .setup-progress__label {
+    flex-wrap: wrap;
+  }
+
+  .setup-progress__wait {
+    width: 100%;
+    margin: -0.15rem 0 0 1.55rem;
+  }
+
+  .setup-footer {
+    bottom: 1.1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}

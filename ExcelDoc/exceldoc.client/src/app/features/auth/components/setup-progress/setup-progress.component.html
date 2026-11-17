@@ -1,0 +1,104 @@
+<main *ngIf="isPreparing; else setupError" class="setup-screen" role="status" aria-live="polite" aria-label="Preparação inicial do ExcelDoc">
+  <header class="setup-header">
+    <div class="setup-brand" aria-label="ExcelDoc">
+      <img src="assets/branding/logo-login-dark.png" alt="ExcelDoc">
+    </div>
+    <span class="setup-header__label"><span class="setup-header__dot"></span> Configuração inicial</span>
+  </header>
+
+  <section class="setup-card" aria-labelledby="setup-title">
+    <div class="setup-card__intro">
+      <div class="setup-icon" aria-hidden="true">
+        <mat-icon>table_view</mat-icon>
+        <span class="setup-icon__spark setup-icon__spark--one"></span>
+        <span class="setup-icon__spark setup-icon__spark--two"></span>
+      </div>
+
+      <div class="setup-copy">
+        <span class="setup-eyebrow">PREPARANDO O EXCELDOC</span>
+        <h1 id="setup-title">Organizando seu ambiente</h1>
+        <p>Estamos verificando as tabelas, configurando os campos e preparando os mapeamentos padrão para sua base SAP.</p>
+      </div>
+    </div>
+
+    <section class="workbook" aria-label="Exemplo da estrutura ExcelDoc sendo preparada">
+      <div class="workbook__topbar">
+        <span class="workbook__app-icon" aria-hidden="true"><mat-icon>grid_on</mat-icon></span>
+        <div class="workbook__file">
+          <strong>Estrutura ExcelDoc</strong>
+          <span>Configuração da base SAP</span>
+        </div>
+        <span class="workbook__live"><span></span> EM PREPARAÇÃO</span>
+      </div>
+
+      <div class="workbook__viewport">
+        <table class="workbook__table">
+          <thead>
+            <tr>
+              <th class="workbook__index" aria-label="Número da linha"></th>
+              <th>Tabela</th>
+              <th>Campo</th>
+              <th>Configuração padrão</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of schemaRows; let i = index">
+              <td class="workbook__index">{{ i + 1 }}</td>
+              <td><code>{{ row.table }}</code></td>
+              <td>{{ row.field }}</td>
+              <td class="workbook__description">{{ row.description }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="workbook__tabbar">
+        <span class="workbook__tab workbook__tab--active"><mat-icon>grid_on</mat-icon> Estruturas</span>
+        <span class="workbook__tab"><mat-icon>tune</mat-icon> Mapeamentos</span>
+        <span class="workbook__tabbar-note"><mat-icon>sync</mat-icon> Verificando e preparando a base</span>
+      </div>
+    </section>
+
+    <div class="setup-progress">
+      <div class="setup-progress__label">
+        <span class="setup-spinner" aria-hidden="true"></span>
+        <span>Preparação em andamento</span>
+        <span class="setup-progress__wait">A primeira configuração pode levar alguns minutos</span>
+      </div>
+      <div class="setup-progress__track" aria-hidden="true"><span></span></div>
+      <p>Mantenha esta janela aberta. Você será levado ao sistema assim que tudo estiver pronto.</p>
+    </div>
+  </section>
+
+  <footer class="setup-footer">
+    <mat-icon aria-hidden="true">lock</mat-icon>
+    <span>Conexão segura com SAP Business One</span>
+  </footer>
+</main>
+
+<ng-template #setupError>
+  <main class="setup-screen setup-screen--error" role="alert">
+    <header class="setup-header">
+      <div class="setup-brand" aria-label="ExcelDoc">
+        <img src="assets/branding/logo-login-dark.png" alt="ExcelDoc">
+      </div>
+      <span class="setup-header__label">Configuração inicial</span>
+    </header>
+
+    <section class="setup-card setup-error-card" aria-labelledby="setup-error-title">
+      <span class="setup-error-icon" aria-hidden="true"><mat-icon>error_outline</mat-icon></span>
+      <span class="setup-eyebrow">NÃO FOI POSSÍVEL CONCLUIR</span>
+      <h1 id="setup-error-title">Não foi possível preparar a base</h1>
+      <p>{{ errorMessage }}</p>
+      <button mat-flat-button color="primary" type="button" (click)="returnToLogin()">
+        <mat-icon aria-hidden="true">arrow_back</mat-icon>
+        Voltar ao login
+      </button>
+    </section>
+
+    <footer class="setup-footer">
+      <mat-icon aria-hidden="true">lock</mat-icon>
+      <span>Conexão segura com SAP Business One</span>
+    </footer>
+  </main>
+</ng-template>

@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AuthService, LoginResponse, SapBase } from '../../../../core/services/auth.service';
+import { AuthService, SapBase } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -16,7 +16,6 @@ export class LoginComponent implements OnInit {
   errorMessage = '';
   hidePassword = true;
   isLoadingBases = false;
-  isSubmitting = false;
   login = '';
   senha = '';
 
@@ -44,22 +43,13 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    this.isSubmitting = true;
-    this.authService.login({
+    this.authService.setPendingLogin({
       database: this.database,
       login: this.login.trim(),
       senha: this.senha
-    }).subscribe({
-      next: (response: LoginResponse) => {
-        this.senha = '';
-        this.isSubmitting = false;
-        void this.router.navigate([this.authService.getDefaultRoute(response)]);
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage = error.error?.detail ?? 'Não foi possível realizar o login.';
-        this.isSubmitting = false;
-      }
     });
+    this.senha = '';
+    void this.router.navigate(['/login/preparando']);
   }
 
   retryLoadBases(): void {

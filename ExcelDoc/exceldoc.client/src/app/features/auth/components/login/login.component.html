@@ -71,10 +71,9 @@
                   color="primary"
                   type="submit"
                   class="full-width login-btn"
-                  [disabled]="isSubmitting || isLoadingBases || !bases.length">
-            <mat-spinner *ngIf="isSubmitting" diameter="20" class="spinner-inline"></mat-spinner>
-            <span>{{ isSubmitting ? 'Entrando...' : 'Entrar' }}</span>
-            <mat-icon *ngIf="!isSubmitting" aria-hidden="true">arrow_forward</mat-icon>
+                  [disabled]="isLoadingBases || !bases.length">
+            <span>Entrar</span>
+            <mat-icon aria-hidden="true">arrow_forward</mat-icon>
           </button>
         </form>
         <p class="login-card__security"><mat-icon aria-hidden="true">verified_user</mat-icon> Sua senha é usada somente para autenticar no SAP e nunca é armazenada.</p>

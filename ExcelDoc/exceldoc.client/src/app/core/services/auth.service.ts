@@ -22,6 +22,7 @@ export class AuthService {
   private readonly apiUrl = '/api/auth';
   private readonly tokenStorageKey = 'exceldoc.jwt';
   private readonly sessionStorageKey = 'exceldoc.session';
+  private pendingLogin: LoginRequest | null = null;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -32,6 +33,16 @@ export class AuthService {
         localStorage.setItem(this.sessionStorageKey, JSON.stringify(response));
       })
     );
+  }
+
+  setPendingLogin(request: LoginRequest): void {
+    this.pendingLogin = { ...request };
+  }
+
+  takePendingLogin(): LoginRequest | null {
+    const request = this.pendingLogin;
+    this.pendingLogin = null;
+    return request;
   }
 
   getBases(): Observable<SapBase[]> {
