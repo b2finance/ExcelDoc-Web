@@ -23,7 +23,7 @@ public sealed class SapSessionStore : ISapSessionStore
 
         lock (entry.SyncRoot)
         {
-            if (entry.LogoutRequested)
+            if (entry.LogoutRequested || entry.Session.IsInvalidated)
             {
                 return false;
             }
@@ -53,7 +53,7 @@ public sealed class SapSessionStore : ISapSessionStore
 
         lock (entry.SyncRoot)
         {
-            if (entry.ActiveJobs <= 0)
+            if (entry.ActiveJobs <= 0 || entry.Session.IsInvalidated)
             {
                 return false;
             }
@@ -124,6 +124,26 @@ public sealed class SapSessionStore : ISapSessionStore
             return _sessions.TryRemove(sessionKey, out var removed)
                 ? removed.Session
                 : null;
+        }
+    }
+
+    public SapSessionContext? Invalidate(string sessionKey)
+    {
+        if (!_sessions.TryGetValue(sessionKey, out var entry))
+        {
+            return null;
+        }
+
+        lock (entry.SyncRoot)
+        {
+            entry.Session.Invalidate();
+            entry.LogoutRequested = true;
+            if (entry.ActiveJobs > 0)
+            {
+                return null;
+            }
+
+            return _sessions.TryRemove(sessionKey, out var removed) ? removed.Session : null;
         }
     }
 

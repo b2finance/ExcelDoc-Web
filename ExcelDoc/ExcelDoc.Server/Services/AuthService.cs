@@ -86,13 +86,30 @@ public sealed class AuthService : IAuthService
                 "A base SAP Business One selecionada não está configurada para esta instalação.");
         }
 
-        var database = configuredBase.Database.Trim();
-        var userName = request.Login.Trim();
+        return await LoginSelectedAsync(
+            _sapOptions.BaseUrl,
+            configuredBase.Database.Trim(),
+            request.Login.Trim(),
+            request.Senha,
+            request.Login.Trim(),
+            cancellationToken);
+    }
+
+    public async Task<LoginResponseDto> LoginSelectedAsync(
+        string serviceLayerUrl,
+        string database,
+        string sapUserName,
+        string password,
+        string devHubUserName,
+        CancellationToken cancellationToken = default)
+    {
+        var userName = sapUserName.Trim();
         var isAdministrator = AdministratorUsers.Contains(userName);
         var session = await _sapServiceLayerClient.LoginAsync(
+            serviceLayerUrl,
             database,
             userName,
-            request.Senha,
+            password,
             cancellationToken);
 
         try
@@ -129,9 +146,9 @@ public sealed class AuthService : IAuthService
             Math.Max(1, _jwtOptions.ExpirationMinutes));
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, userName),
-            new(ClaimTypes.Name, userName),
-            new(ClaimTypes.GivenName, userName),
+            new(ClaimTypes.NameIdentifier, devHubUserName),
+            new(ClaimTypes.Name, devHubUserName),
+            new(ClaimTypes.GivenName, devHubUserName),
             new(ClaimTypes.Role, role),
             new(CustomClaimTypes.Database, database),
             new(CustomClaimTypes.SapSessionKey, session.SessionKey)
@@ -160,7 +177,7 @@ public sealed class AuthService : IAuthService
         {
             Token = token,
             ExpiresAtUtc = expiresAt,
-            NomeUsuario = userName,
+            NomeUsuario = devHubUserName,
             TipoUsuario = role,
             Database = database,
             Idioma = "pt"

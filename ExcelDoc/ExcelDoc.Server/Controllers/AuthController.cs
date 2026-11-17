@@ -18,14 +18,14 @@ public sealed class AuthController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("bases")]
+    [NonAction]
     public ActionResult<IReadOnlyCollection<SapBaseDto>> GetBases()
     {
         return Ok(_authService.GetBases());
     }
 
     [AllowAnonymous]
-    [HttpPost("login")]
+    [NonAction]
     public async Task<IActionResult> Login(
         [FromBody] LoginRequestDto request,
         CancellationToken cancellationToken)

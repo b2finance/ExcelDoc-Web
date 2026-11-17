@@ -28,7 +28,7 @@ Referências:
 
 ## 2. Configurar a instalação
 
-Defina `SapServiceLayer:BaseUrl` e `SapServiceLayer:Bases` no `appsettings.json` implantado. Cada entrada contém o nome técnico da base (`CompanyDB`) e sua descrição para a tela de login.
+Configure `DevHub:BaseUrl` apenas quando necessário para outro ambiente HTTPS. As bases, o usuário SAP e a URL da Service Layer são obtidos do DevHub para o cliente autorizado. Configure `SapServiceLayer:RequestTimeoutSeconds` e `SapServiceLayer:Language` conforme a instalação.
 
 Não adicione:
 
@@ -136,9 +136,8 @@ Uma sessão válida precisa preservar `B1SESSION` e `ROUTEID`. O logout da aplic
 Após iniciar o site:
 
 1. acesse a raiz e confirme que a tela de login e seus assets carregam sem 404;
-2. chame `GET /api/auth/bases` sem token e confirme que ele retorna somente
-   `database` e `description`, sem URL, usuário, senha ou cookie;
-3. faça login em cada base configurada;
+2. entre no DevHub e confirme que apenas os clientes ativos autorizados aparecem;
+3. selecione um cliente e uma base, informe a senha SAP e confirme a conexão;
 4. confirme `manager` e `Support` como administradores;
 5. confirme um usuário comum sem acesso às ações administrativas e sem alteração de modelos/mapeamentos padrão;
 6. envie uma planilha pequena e acompanhe o processamento até o SAP;

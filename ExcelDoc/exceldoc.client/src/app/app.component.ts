@@ -34,6 +34,18 @@ export class AppComponent implements OnInit {
     return this.session?.database.trim() ?? '';
   }
 
+  changePartner(): void {
+    this.authService.changePartner().subscribe({
+      next: () => {
+        void this.router.navigate(['/login']);
+      },
+      error: () => {
+        this.authService.logout();
+        void this.router.navigate(['/login']);
+      }
+    });
+  }
+
   logout(): void {
     this.authService.logout();
     void this.router.navigate(['/login']);

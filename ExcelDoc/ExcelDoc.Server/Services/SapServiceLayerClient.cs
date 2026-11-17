@@ -53,10 +53,20 @@ public sealed class SapServiceLayerClient : ISapServiceLayerClient, IDisposable
         string password,
         CancellationToken cancellationToken = default)
     {
+        return await LoginAsync(_sapOptions.BaseUrl, database, userName, password, cancellationToken);
+    }
+
+    public async Task<SapSessionContext> LoginAsync(
+        string serviceLayerUrl,
+        string database,
+        string userName,
+        string password,
+        CancellationToken cancellationToken = default)
+    {
         cancellationToken.ThrowIfCancellationRequested();
 
         var connection = new SLConnection(
-            NormalizeBaseAddress(_sapOptions.BaseUrl),
+            NormalizeBaseAddress(serviceLayerUrl),
             database,
             userName,
             password,
@@ -125,7 +135,8 @@ public sealed class SapServiceLayerClient : ISapServiceLayerClient, IDisposable
     {
         ArgumentNullException.ThrowIfNull(session);
 
-        var connection = session.GetRequiredConnection();
+        var connection = session.Connection ?? throw new InvalidOperationException(
+            "A conexão B1SLayer não está disponível para esta sessão SAP.");
         try
         {
             cancellationToken.ThrowIfCancellationRequested();

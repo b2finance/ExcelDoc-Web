@@ -103,6 +103,10 @@ namespace ExcelDoc.Server.Services
             foreach (var group in groups)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                if (sapSession.IsInvalidated)
+                {
+                    throw new Sap.SapSessionExpiredException("O contexto SAP foi encerrado.");
+                }
 
                 var groupRows = group.Rows;
                 var firstRowNumber = groupRows[0].RowNumber;

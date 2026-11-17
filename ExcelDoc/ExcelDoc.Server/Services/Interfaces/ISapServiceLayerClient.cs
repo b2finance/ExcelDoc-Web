@@ -16,6 +16,16 @@ namespace ExcelDoc.Server.Services.Interfaces
             string password,
             CancellationToken cancellationToken = default);
 
+        Task<SapSessionContext> LoginAsync(
+            string serviceLayerUrl,
+            string database,
+            string userName,
+            string password,
+            CancellationToken cancellationToken = default)
+        {
+            return LoginAsync(database, userName, password, cancellationToken);
+        }
+
         Task LogoutAsync(
             SapSessionContext session,
             CancellationToken cancellationToken = default);

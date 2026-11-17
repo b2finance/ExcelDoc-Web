@@ -1,82 +1,96 @@
 <div class="login-container">
   <section class="login-brand" aria-label="ExcelDoc">
+    <div class="login-brand__top">
+      <img class="login-brand__logo" src="assets/branding/logo-login-dark.png" alt="ExcelDoc">
+      <span class="login-brand__divider" aria-hidden="true"></span>
+      <span>SAP BUSINESS ONE</span>
+    </div>
+
     <div class="login-brand__content">
       <span class="login-brand__eyebrow">GESTÃO INTELIGENTE DE DOCUMENTOS</span>
-      <img class="login-brand__logo" src="assets/branding/logo-login-dark.png" alt="ExcelDoc">
-      <p class="login-brand__description">
-        Centralize documentos, automatize processos e conecte sua operação ao SAP Business One.
-      </p>
+      <h1>Documentos<br>conectados ao <span>SAP</span></h1>
+      <p class="login-brand__description">Centralize documentos, automatize processos e conecte sua operação ao SAP Business One de forma simples e segura.</p>
+      <ul class="login-brand__features">
+        <li><span><mat-icon aria-hidden="true">table_view</mat-icon></span>Integração com o SAP Business One</li>
+        <li><span><mat-icon aria-hidden="true">verified_user</mat-icon></span>Segurança e rastreabilidade</li>
+        <li><span><mat-icon aria-hidden="true">check</mat-icon></span>Mais agilidade nos processos</li>
+      </ul>
     </div>
-    <span class="login-brand__footer">Integração segura com SAP Business One</span>
   </section>
 
-  <section class="login-form-area">
+  <section class="login-form-area" aria-label="Acesso ao sistema">
     <mat-card class="login-card">
       <mat-card-header class="login-card__header">
-        <span class="login-card__header-icon" aria-hidden="true"><mat-icon>person</mat-icon></span>
+        <span class="login-card__header-icon" aria-hidden="true"><mat-icon>person_outline</mat-icon></span>
         <div>
-          <span class="login-card__eyebrow">ACESSO AO SISTEMA</span>
+          <span class="login-card__eyebrow">Acesso ao sistema</span>
           <mat-card-title>Bem-vindo</mat-card-title>
-          <mat-card-subtitle>Informe seus dados do SAP Business One.</mat-card-subtitle>
         </div>
       </mat-card-header>
-
       <mat-card-content>
-        <p class="feedback feedback--error" *ngIf="errorMessage">{{ errorMessage }}</p>
-        <div class="feedback feedback--error" *ngIf="basesErrorMessage">
-          <span>{{ basesErrorMessage }}</span>
-          <button mat-button type="button" (click)="retryLoadBases()" [disabled]="isLoadingBases">
-            Tentar novamente
-          </button>
-        </div>
-
-        <form class="login-form" (ngSubmit)="onSubmit()">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Base SAP</mat-label>
-            <mat-icon matPrefix aria-hidden="true">database</mat-icon>
-            <mat-select name="database"
-                        [(ngModel)]="database"
-                        [disabled]="isLoadingBases || !bases.length"
-                        required>
-              <mat-option *ngFor="let base of bases" [value]="base.database">
-                {{ base.description ? (base.description + ' (' + base.database + ')') : base.database }}
-              </mat-option>
-            </mat-select>
-            <mat-hint *ngIf="isLoadingBases">Carregando bases...</mat-hint>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Usuário</mat-label>
-            <mat-icon matPrefix aria-hidden="true">person</mat-icon>
-            <input matInput
-                   type="text"
-                   name="login"
-                   [(ngModel)]="login"
-                   placeholder="Digite seu usuário"
-                   autocomplete="username" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Senha</mat-label>
-            <mat-icon matPrefix aria-hidden="true">lock</mat-icon>
-            <input matInput
-                   [type]="hidePassword ? 'password' : 'text'"
-                   name="senha"
-                   [(ngModel)]="senha"
-                   placeholder="Digite sua senha"
-                   autocomplete="current-password" />
-          </mat-form-field>
-
-          <button mat-flat-button
-                  color="primary"
-                  type="submit"
-                  class="full-width login-btn"
-                  [disabled]="isLoadingBases || !bases.length">
-            <span>Entrar</span>
-            <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+        <p class="login-card__intro">{{ partners.length ? 'Selecione o cliente e conecte ao SAP.' : 'Entre com suas credenciais DevHub.' }}</p>
+        <p class="feedback feedback--error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+        <form class="login-form" *ngIf="!partners.length" (ngSubmit)="authenticate()" [attr.aria-busy]="busy">
+          <div class="login-field">
+            <label for="userName">Usuário DevHub <span aria-hidden="true">*</span></label>
+            <div class="login-field__input" [class.login-field__input--disabled]="busy">
+              <mat-icon aria-hidden="true">person_outline</mat-icon>
+              <input id="userName" name="userName" [(ngModel)]="userName" autocomplete="username" [disabled]="busy" required>
+            </div>
+          </div>
+          <div class="login-field">
+            <label for="devHubPassword">Senha DevHub <span aria-hidden="true">*</span></label>
+            <div class="login-field__input" [class.login-field__input--disabled]="busy">
+              <mat-icon aria-hidden="true">lock_outline</mat-icon>
+              <input id="devHubPassword" [type]="showDevHubPassword ? 'text' : 'password'" name="devHubPassword" [(ngModel)]="devHubPassword" autocomplete="current-password" [disabled]="busy" required>
+              <button class="login-field__toggle" type="button" (click)="showDevHubPassword = !showDevHubPassword" [attr.aria-label]="showDevHubPassword ? 'Ocultar senha DevHub' : 'Mostrar senha DevHub'" [attr.aria-pressed]="showDevHubPassword" [disabled]="busy"><mat-icon aria-hidden="true">{{ showDevHubPassword ? 'visibility_off' : 'visibility' }}</mat-icon></button>
+            </div>
+          </div>
+          <label class="login-remember" [class.login-remember--disabled]="busy"><input type="checkbox" name="rememberUser" [(ngModel)]="rememberUser" [disabled]="busy"> <span>Lembrar meu usuário</span></label>
+          <button mat-flat-button color="primary" type="submit" class="full-width login-btn" [class.login-btn--loading]="busy" [disabled]="busy">
+            <span *ngIf="busy; else loginButtonLabel" class="login-btn__content" role="status" aria-live="polite">
+              <mat-spinner diameter="18" aria-hidden="true"></mat-spinner>
+              Buscando informações no DevHub...
+            </span>
+            <ng-template #loginButtonLabel>Entrar no DevHub</ng-template>
           </button>
         </form>
-        <p class="login-card__security"><mat-icon aria-hidden="true">verified_user</mat-icon> Sua senha é usada somente para autenticar no SAP e nunca é armazenada.</p>
+
+        <form class="login-form login-form--sap" *ngIf="partners.length" (ngSubmit)="connect()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Cliente</mat-label>
+            <mat-select name="partnerId" [(ngModel)]="partnerId" (selectionChange)="selectPartner()" [disabled]="busy" required>
+              <mat-option *ngFor="let partner of partners" [value]="partner.partnerId">{{ partner.partnerName }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <ng-container *ngIf="selection as selected">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Base SAP</mat-label>
+              <mat-select name="databaseId" [(ngModel)]="databaseId" [disabled]="busy || !selected.databases.length" required>
+                <mat-option *ngFor="let base of selected.databases" [value]="base.id">{{ base.nomeBase }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <p class="login-sap-user">Usuário SAP: {{ selected.serviceLayer.userName }}</p>
+            <div class="login-field">
+              <label for="sapPassword">Senha SAP <span aria-hidden="true">*</span></label>
+              <div class="login-field__input">
+                <mat-icon aria-hidden="true">lock_outline</mat-icon>
+                <input id="sapPassword" [type]="showSapPassword ? 'text' : 'password'" name="sapPassword" [(ngModel)]="sapPassword" autocomplete="off" required>
+                <button class="login-field__toggle" type="button" (click)="showSapPassword = !showSapPassword" [attr.aria-label]="showSapPassword ? 'Ocultar senha SAP' : 'Mostrar senha SAP'" [attr.aria-pressed]="showSapPassword"><mat-icon aria-hidden="true">{{ showSapPassword ? 'visibility_off' : 'visibility' }}</mat-icon></button>
+              </div>
+            </div>
+          </ng-container>
+          <div class="login-loading" *ngIf="busy" role="status" aria-live="polite">
+            <mat-spinner diameter="22" aria-hidden="true"></mat-spinner>
+            <span>Carregando bases e dados do cliente...</span>
+          </div>
+          <button mat-flat-button color="primary" type="submit" class="full-width login-btn" [disabled]="busy || !selection || !selection.databases.length">Conectar ao SAP</button>
+          <button mat-button type="button" (click)="logout()" [disabled]="busy">Sair do DevHub</button>
+        </form>
+        <div class="login-card__footer">
+          <span><mat-icon aria-hidden="true">description</mat-icon> Gestão de documentos</span>
+          <span><mat-icon aria-hidden="true">verified_user</mat-icon> Integração segura</span>
+        </div>
       </mat-card-content>
     </mat-card>
   </section>

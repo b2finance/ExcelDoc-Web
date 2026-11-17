@@ -29,14 +29,8 @@ builder.Services
 
 builder.Services.AddSingleton<IValidateOptions<JwtOptions>, JwtOptionsValidator>();
 
-builder.Services
-    .AddOptions<SapServiceLayerOptions>()
-    .Bind(builder.Configuration.GetSection(SapServiceLayerOptions.SectionName))
-    .ValidateOnStart();
-
-builder.Services.AddSingleton<
-    IValidateOptions<SapServiceLayerOptions>,
-    SapServiceLayerOptionsValidator>();
+builder.Services.Configure<SapServiceLayerOptions>(
+    builder.Configuration.GetSection(SapServiceLayerOptions.SectionName));
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.AddInfrastructureLanguages();
@@ -69,6 +63,18 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddInfrastructureRepositories();
+builder.Services.AddSingleton<ExcelDoc.Server.Services.DevHubAuthenticationService>();
+builder.Services.AddHttpClient(ExcelDoc.Server.Services.DevHubAuthenticationService.ClientName, client =>
+{
+    var configuredUrl = builder.Configuration["DevHub:BaseUrl"] ?? "https://devhub.b2finance.com/";
+    if (!Uri.TryCreate(configuredUrl, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
+    {
+        throw new InvalidOperationException("DevHub:BaseUrl deve ser uma URL HTTPS.");
+    }
+
+    client.BaseAddress = new Uri(configuredUrl.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(30);
+}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
 builder.Services.AddOptions<LicenseOptions>().Bind(builder.Configuration.GetSection(LicenseOptions.SectionName));
 
 builder.Services.AddHttpClient(ExcelDoc.Server.Services.LicenseService.ClientName, (provider, client) =>

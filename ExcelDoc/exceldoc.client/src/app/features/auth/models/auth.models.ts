@@ -3,15 +3,37 @@ export const AUTH_ROLES = {
   user: 'Usuario'
 } as const;
 
-export interface SapBase {
-  database: string;
-  description: string;
+export interface DevHubPartner {
+  partnerId: number;
+  partnerName: string;
+}
+
+export interface SapDatabase {
+  id: number;
+  nomeBase: string;
+  partnerId: number;
+}
+
+export interface DevHubSelection {
+  partnerId: number;
+  databases: SapDatabase[];
+  serviceLayer: {
+    url: string;
+    userName: string;
+    partnerId: number;
+    partnerName: string;
+  };
+}
+
+export interface DevHubLoginResponse {
+  sessionKey: string;
+  partners: DevHubPartner[];
 }
 
 export interface LoginRequest {
-  database: string;
-  login: string;
-  senha: string;
+  partnerId: number;
+  databaseId: number;
+  password: string;
 }
 
 export interface LoginResponse {

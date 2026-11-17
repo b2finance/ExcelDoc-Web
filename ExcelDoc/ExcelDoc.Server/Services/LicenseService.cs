@@ -27,14 +27,13 @@ public sealed class LicenseService(
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var config = options.Value;
-            config.UserName = "B2Finance";
-            config.Password = "B1@Admin";
-
+            var config = options.Value;            config.ProductId = "13";
             if (string.IsNullOrWhiteSpace(config.ProductId) ||
                 string.IsNullOrWhiteSpace(config.UserName) ||
                 string.IsNullOrWhiteSpace(config.Password))
+            {
                 throw new InvalidOperationException("Configuração de licenciamento incompleta.");
+            }
 
             var installation = await sapClient.GetInstallationNumberAsync(session, cancellationToken);
             if (string.IsNullOrWhiteSpace(installation))

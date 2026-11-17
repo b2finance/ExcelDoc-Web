@@ -22,46 +22,17 @@ dotnet run
 
 O perfil de desenvolvimento inicia o proxy do Angular. As chamadas do frontend usam caminhos relativos `/api`, portanto backend e frontend permanecem na mesma origem.
 
-## Configuração SAP
+## Autenticação DevHub e conexão SAP
 
-A configuração por instalação fica na seção `SapServiceLayer`:
+O usuário entra com suas credenciais DevHub e escolhe um cliente ativo autorizado. O servidor consulta as bases e a configuração da Service Layer desse cliente, valida a associação dos dados e solicita uma senha SAP para a base escolhida. A sessão do ExcelDoc só é emitida após a conexão SAP, a validação de licença e a inicialização da base.
 
-```json
-{
-  "SapServiceLayer": {
-    "BaseUrl": "https://sap-interno:50000/b1s/v1/",
-    "RequestTimeoutSeconds": 100,
-    "Bases": [
-      {
-        "Database": "SBOPROD_BR",
-        "Description": "Base de produção"
-      }
-    ]
-  }
-}
-```
+O token DevHub permanece no servidor e é enviado como Bearer apenas às consultas DevHub. Sua expiração é verificada antes de novas consultas ou conexões; a expiração não interrompe uma conexão SAP já ativa. Ao trocar de cliente ou conexão, informe novamente a senha SAP. A troca invalida a sessão anterior e cancela as requisições pendentes; operações já recebidas pelo SAP podem ter sido concluídas antes do cancelamento.
 
-Regras operacionais:
+Por padrão, o DevHub usa `https://devhub.b2finance.com/`. Para outros ambientes, configure `DevHub:BaseUrl` como uma URL HTTPS. `SapServiceLayer:RequestTimeoutSeconds` e `SapServiceLayer:Language` continuam configuráveis no servidor. As bases, o usuário SAP e a URL da Service Layer vêm do DevHub, não da tela nem da configuração local.
 
-- `BaseUrl` aponta para a raiz versionada da Service Layer.
-- `Database` deve ser exatamente o `CompanyDB` aceito pelo SAP.
-- somente `Database` e `Description` são expostos na lista pública da tela de login;
-- nomes de bases devem ser únicos, sem espaços nas extremidades;
-- credenciais SAP são as do usuário no login e não devem ser gravadas no arquivo de configuração.
+O perfil de administrador do ExcelDoc continua associado aos usuários SAP `manager` e `Support`. As permissões do DevHub são consultadas no perfil, mas não há no contrato um mapeamento de menus DevHub para papéis do ExcelDoc.
 
-As chamadas à Service Layer usam B1SLayer. Cada login mantém uma única
-`SLConnection` para a combinação de base e usuário durante toda a sessão; a
-biblioteca gerencia os cookies, a renovação da sessão, as tentativas e o
-transporte HTTPS.
-
-Segredos de JWT e qualquer outro segredo de produção devem ser fornecidos por configuração protegida do servidor, nunca mantidos com valores padrão no repositório.
-O `appsettings.json` de produção não contém `Jwt:SecretKey` de propósito:
-defina `Jwt__SecretKey` com um valor aleatório de pelo menos 32 caracteres no
-ambiente protegido do servidor. A aplicação falha na inicialização quando o
-segredo está ausente, curto ou ainda é um placeholder.
-
-A interface incorpora localmente a fonte de ícones Material Symbols. Depois de
-publicado, o site não depende do Google Fonts nem de outro CDN para funcionar.
+As sessões ficam em memória no servidor e são perdidas ao reiniciá-lo. O acesso deve ser feito por HTTPS; os segredos de configuração devem ficar em um armazenamento protegido. O segredo JWT precisa ter pelo menos 32 caracteres e deve ser fornecido em `Jwt__SecretKey`.
 
 ## Testes
 
@@ -105,18 +76,18 @@ Consulte o [runbook de SAP e IIS](ExcelDoc/docs/SAP-IIS-RUNBOOK.md) para instala
 Cada login consulta o DevHub antes de inicializar a base ou emitir o JWT.
 O número de instalação é obtido da sessão SAP do próprio usuário. O parceiro e sua
 licença são consultados em `BusinessPartners/installation-number/{numero}` e
-`licenses/search`, com o ProductId **7**. Somente licença ativa e não vencida libera
+`licenses/search`, com o produto 13. Somente licença ativa e não vencida libera
 acesso, inclusive para administradores. Parceiro/licença ausente resulta em HTTP
 403; falhas na consulta resultam em HTTP 503 e bloqueiam o login. A sessão SAP é
 encerrada quando o login é recusado. A mensagem aparece na tela de login.
 
-Configure a seção `Licensing` no servidor:
+Configure a seção `Licensing` no servidor e forneça `Licensing__UserName` e `Licensing__Password` por configuração protegida. As credenciais de licenciamento são independentes da senha informada pelo usuário na tela:
 
 ```json
 {
   "Licensing": {
     "BaseUrl": "https://devhub.b2finance.com/",
-    "ProductId": "7"
+    "ProductId": "13"
   }
 }
 ```

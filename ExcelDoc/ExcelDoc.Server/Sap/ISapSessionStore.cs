@@ -16,6 +16,8 @@ public interface ISapSessionStore
 
     SapSessionContext? RequestLogout(string sessionKey);
 
+    SapSessionContext? Invalidate(string sessionKey);
+
     IReadOnlyCollection<SapSessionContext> GetActiveJobSessions();
 
     IReadOnlyCollection<SapSessionContext> RemoveExpired();
