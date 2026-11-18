@@ -19,7 +19,6 @@ export interface DevHubSelection {
   databases: SapDatabase[];
   serviceLayer: {
     url: string;
-    userName: string;
     partnerId: number;
     partnerName: string;
   };
@@ -33,6 +32,7 @@ export interface DevHubLoginResponse {
 export interface LoginRequest {
   partnerId: number;
   databaseId: number;
+  sapUserName: string;
   password: string;
 }
 

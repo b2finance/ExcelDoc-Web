@@ -394,26 +394,20 @@
       margin-top: 4px;
     }
 
-.login-sap-user {
-  margin: 4px 0 16px;
-  color: var(--secondary-text);
-  font-size: 14px;
-}
+  .login-form--sap .login-loading,
+  .login-form--sap .login-btn {
+    margin-top: 16px;
+  }
 
-.login-form--sap .login-loading,
-.login-form--sap .login-btn {
-  margin-top: 16px;
-}
+  .login-form--sap .login-btn {
+    height: 47px;
+    font-size: 16px;
+  }
 
-.login-form--sap .login-btn {
-  height: 47px;
-  font-size: 16px;
-}
-
-.login-form--sap > button[mat-button] {
-  min-height: 45px;
-  margin-top: 8px;
-}
+  .login-form--sap > button[mat-button] {
+    min-height: 45px;
+    margin-top: 8px;
+  }
 
 .feedback--error {
   margin: 0 0 16px;
@@ -529,4 +523,8 @@
     gap: 12px;
     font-size: 11px;
   }
+}
+
+.login-form--sap .login-field + .login-field {
+  margin-top: 18px;
 }

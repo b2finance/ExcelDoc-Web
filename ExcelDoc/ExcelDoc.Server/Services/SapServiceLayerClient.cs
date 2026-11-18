@@ -48,15 +48,6 @@ public sealed class SapServiceLayerClient : ISapServiceLayerClient, IDisposable
     }
 
     public async Task<SapSessionContext> LoginAsync(
-        string database,
-        string userName,
-        string password,
-        CancellationToken cancellationToken = default)
-    {
-        return await LoginAsync(_sapOptions.BaseUrl, database, userName, password, cancellationToken);
-    }
-
-    public async Task<SapSessionContext> LoginAsync(
         string serviceLayerUrl,
         string database,
         string userName,

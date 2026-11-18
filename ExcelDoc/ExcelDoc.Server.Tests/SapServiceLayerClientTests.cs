@@ -87,6 +87,7 @@ public sealed class SapServiceLayerClientTests
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
             client.LoginAsync(
+                "https://sap.example.test:50000/b1s/v1",
                 "SBOPROD",
                 "manager",
                 "sap-password",
@@ -112,16 +113,7 @@ public sealed class SapServiceLayerClientTests
         var sapOptions =
             Microsoft.Extensions.Options.Options.Create(new SapServiceLayerOptions
             {
-                BaseUrl = "https://sap.example.test:50000/b1s/v1",
-                RequestTimeoutSeconds = 30,
-                Bases =
-                [
-                    new SapBaseOptions
-                    {
-                        Database = "SBOPROD",
-                        Description = "Produção"
-                    }
-                ]
+                RequestTimeoutSeconds = 30
             });
 
         return new SapServiceLayerClient(

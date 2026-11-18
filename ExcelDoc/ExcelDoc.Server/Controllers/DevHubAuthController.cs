@@ -30,7 +30,7 @@ public sealed class DevHubAuthController(
     public async Task<IActionResult> Connect(DevHubConnectRequest request, CancellationToken cancellationToken)
     {
         return await ExecuteAsync(() => service.ConnectAsync(
-            SessionKey, request.PartnerId, request.DatabaseId, request.Password,
+            SessionKey, request.PartnerId, request.DatabaseId, request.SapUserName, request.Password,
             authService, accessor, cancellationToken));
     }
 
@@ -111,6 +111,9 @@ public sealed class DevHubConnectRequest
 {
     public int PartnerId { get; set; }
     public int DatabaseId { get; set; }
+
+    [Required]
+    public string SapUserName { get; set; } = string.Empty;
 
     [Required]
     [MaxLength(254)]

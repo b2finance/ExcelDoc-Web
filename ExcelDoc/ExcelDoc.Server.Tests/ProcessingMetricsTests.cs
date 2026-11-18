@@ -103,7 +103,7 @@ public sealed class ProcessingMetricsTests
         public int Calls;
         public bool ValidCalls = true;
         public bool Fail;
-        public Task ValidateAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task ValidateAsync(SapSessionContext session, DevHubLicenseCredentials credentials, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task LogRequestAsync(SapSessionContext session, string message, CancellationToken cancellationToken = default)
         {
             Calls++;
@@ -167,7 +167,7 @@ public sealed class ProcessingMetricsTests
             return Fail || (FailSecond && Calls == 2) ? Task.FromException<string>(new InvalidOperationException("SAP error")) : Task.FromResult("{\"DocEntry\":123}");
         }
         public Task<string> GetInstallationNumberAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();
-        public Task<SapSessionContext> LoginAsync(string database, string userName, string password, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<SapSessionContext> LoginAsync(string serviceLayerUrl, string database, string userName, string password, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task LogoutAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();
     }
     private sealed class Repository : IProcessamentoRepository

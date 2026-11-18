@@ -75,17 +75,10 @@ builder.Services.AddHttpClient(ExcelDoc.Server.Services.DevHubAuthenticationServ
     client.BaseAddress = new Uri(configuredUrl.TrimEnd('/') + "/");
     client.Timeout = TimeSpan.FromSeconds(30);
 }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
-builder.Services.AddOptions<LicenseOptions>().Bind(builder.Configuration.GetSection(LicenseOptions.SectionName));
-
-builder.Services.AddHttpClient(ExcelDoc.Server.Services.LicenseService.ClientName, (provider, client) =>
-{
-    var options = provider.GetRequiredService<IOptions<LicenseOptions>>().Value;
-    if (!Uri.TryCreate(options.BaseUrl, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
-        throw new InvalidOperationException("Licensing: BaseUrl deve ser uma URL HTTPS.");
-
-    client.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
-    client.Timeout = TimeSpan.FromSeconds(30);
-}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+builder.Services.AddOptions<LicenseOptions>()
+    .Bind(builder.Configuration.GetSection(LicenseOptions.SectionName))
+    .Validate(options => !string.IsNullOrWhiteSpace(options.ProductId), "Licensing:ProductId é obrigatório.")
+    .ValidateOnStart();
 
 builder.Services.AddSingleton<ExcelDoc.Server.Services.Interfaces.ILicenseService, ExcelDoc.Server.Services.LicenseService>();
 

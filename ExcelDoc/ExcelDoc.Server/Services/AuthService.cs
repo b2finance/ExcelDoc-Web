@@ -24,7 +24,6 @@ public sealed class AuthService : IAuthService
     private readonly ISapDatabaseInitializer _databaseInitializer;
     private readonly JwtOptions _jwtOptions;
     private readonly ILogger<AuthService> _logger;
-    private readonly SapServiceLayerOptions _sapOptions;
     private readonly ISapServiceLayerClient _sapServiceLayerClient;
     private readonly ISapSessionContextAccessor _sessionAccessor;
     private readonly ISapSessionStore _sessionStore;
@@ -35,7 +34,6 @@ public sealed class AuthService : IAuthService
         ISapDatabaseInitializer databaseInitializer,
         IOptions<JwtOptions> jwtOptions,
         ILogger<AuthService> logger,
-        IOptions<SapServiceLayerOptions> sapOptions,
         ISapServiceLayerClient sapServiceLayerClient,
         ISapSessionContextAccessor sessionAccessor,
         ISapSessionStore sessionStore,
@@ -45,54 +43,11 @@ public sealed class AuthService : IAuthService
         _databaseInitializer = databaseInitializer;
         _jwtOptions = jwtOptions.Value;
         _logger = logger;
-        _sapOptions = sapOptions.Value;
         _sapServiceLayerClient = sapServiceLayerClient;
         _sessionAccessor = sessionAccessor;
         _sessionStore = sessionStore;
         _systemClock = systemClock;
         _licenseService = licenseService;
-    }
-
-    public IReadOnlyCollection<SapBaseDto> GetBases()
-    {
-        return _sapOptions.Bases
-            .Where(item =>
-                !string.IsNullOrWhiteSpace(item.Database) &&
-                !string.IsNullOrWhiteSpace(item.Description))
-            .GroupBy(item => item.Database.Trim(), StringComparer.OrdinalIgnoreCase)
-            .Select(group => group.First())
-            .OrderBy(item => item.Description, StringComparer.CurrentCultureIgnoreCase)
-            .Select(item => new SapBaseDto
-            {
-                Database = item.Database.Trim(),
-                Description = item.Description.Trim()
-            })
-            .ToList();
-    }
-
-    public async Task<LoginResponseDto> LoginAsync(
-        LoginRequestDto request,
-        CancellationToken cancellationToken = default)
-    {
-        var configuredBase = _sapOptions.Bases.FirstOrDefault(item =>
-            string.Equals(
-                item.Database.Trim(),
-                request.Database.Trim(),
-                StringComparison.OrdinalIgnoreCase));
-
-        if (configuredBase is null)
-        {
-            throw new InvalidOperationException(
-                "A base SAP Business One selecionada não está configurada para esta instalação.");
-        }
-
-        return await LoginSelectedAsync(
-            _sapOptions.BaseUrl,
-            configuredBase.Database.Trim(),
-            request.Login.Trim(),
-            request.Senha,
-            request.Login.Trim(),
-            cancellationToken);
     }
 
     public async Task<LoginResponseDto> LoginSelectedAsync(
@@ -101,6 +56,7 @@ public sealed class AuthService : IAuthService
         string sapUserName,
         string password,
         string devHubUserName,
+        DevHubLicenseCredentials credentials,
         CancellationToken cancellationToken = default)
     {
         var userName = sapUserName.Trim();
@@ -114,7 +70,7 @@ public sealed class AuthService : IAuthService
 
         try
         {
-            await _licenseService.ValidateAsync(session, cancellationToken);
+            await _licenseService.ValidateAsync(session, credentials, cancellationToken);
             _sessionStore.Add(session);
             _sessionAccessor.SetSessionKey(session.SessionKey);
 
@@ -156,7 +112,7 @@ public sealed class AuthService : IAuthService
 
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_jwtOptions.SecretKey));
-        var credentials = new SigningCredentials(
+        var signingCredentials = new SigningCredentials(
             key,
             SecurityAlgorithms.HmacSha256);
         var tokenDescriptor = new JwtSecurityToken(
@@ -164,7 +120,7 @@ public sealed class AuthService : IAuthService
             audience: _jwtOptions.Audience,
             claims: claims,
             expires: expiresAt,
-            signingCredentials: credentials);
+            signingCredentials: signingCredentials);
         var token = new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
 
         _logger.LogInformation(

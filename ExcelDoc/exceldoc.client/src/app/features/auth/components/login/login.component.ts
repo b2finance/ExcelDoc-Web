@@ -17,13 +17,14 @@ export class LoginComponent implements OnInit {
   errorMessage = '';
   userName = '';
   devHubPassword = '';
+  sapUserName = '';
   sapPassword = '';
   busy = false;
   rememberUser = false;
   showDevHubPassword = false;
   showSapPassword = false;
 
-  constructor(private readonly authService: AuthService, private readonly router: Router) {}
+  constructor(private readonly authService: AuthService, private readonly router: Router) { }
 
   ngOnInit(): void {
     try {
@@ -80,6 +81,7 @@ export class LoginComponent implements OnInit {
   selectPartner(): void {
     this.selection = null;
     this.databaseId = null;
+    this.sapUserName = '';
     this.sapPassword = '';
     this.errorMessage = '';
     if (this.partnerId === null) {
@@ -110,14 +112,15 @@ export class LoginComponent implements OnInit {
   }
 
   connect(): void {
-    if (this.partnerId === null || this.databaseId === null || !this.sapPassword) {
-      this.errorMessage = 'Selecione uma base e informe a senha SAP.';
+    if (this.partnerId === null || this.databaseId === null || !this.sapUserName.trim() || !this.sapPassword) {
+      this.errorMessage = 'Selecione uma base e informe o usuário e a senha SAP.';
       return;
     }
 
     this.authService.setPendingLogin({
       partnerId: this.partnerId,
       databaseId: this.databaseId,
+      sapUserName: this.sapUserName.trim(),
       password: this.sapPassword
     });
     this.sapPassword = '';

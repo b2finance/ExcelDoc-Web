@@ -22,12 +22,8 @@ public sealed class AuthServiceAuthorizationTests
     {
         var fixture = CreateFixture();
 
-        var result = await fixture.Service.LoginAsync(new LoginRequestDto
-        {
-            Database = " SBODEMO_BR ",
-            Login = $" {userName} ",
-            Senha = "secret"
-        });
+        var result = await fixture.Service.LoginSelectedAsync(
+            "https://sap.example.local/b1s/v1", "SBODEMO_BR", $" {userName} ", "secret", "dev-user", new("dev-user", "dev-secret"));
 
         Assert.Equal(
             expectedAdministrator
@@ -40,34 +36,14 @@ public sealed class AuthServiceAuthorizationTests
         Assert.Equal(fixture.Client.Session.SessionKey, fixture.Accessor.SessionKey);
     }
 
-    [Fact]
-    public async Task LoginAsync_RejectsDatabaseOutsideConfiguredAllowList()
-    {
-        var fixture = CreateFixture();
-
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            fixture.Service.LoginAsync(new LoginRequestDto
-            {
-                Database = "NOT_CONFIGURED",
-                Login = "manager",
-                Senha = "secret"
-            }));
-
-        Assert.Contains("configurada", exception.Message, StringComparison.OrdinalIgnoreCase);
-        Assert.Equal(0, fixture.Client.LoginCalls);
-        Assert.False(fixture.Initializer.Initialized);
-    }
-
     [Theory]
     [InlineData("manager")]
     [InlineData("operador")]
     public async Task LoginAsync_RejectsLicenseBeforeInitializationAndClosesSap(string userName)
     {
         var fixture = CreateFixture(rejectLicense: true);
-        await Assert.ThrowsAsync<LicenseValidationException>(() => fixture.Service.LoginAsync(new LoginRequestDto
-        {
-            Database = "SBODEMO_BR", Login = userName, Senha = "secret"
-        }));
+        await Assert.ThrowsAsync<LicenseValidationException>(() => fixture.Service.LoginSelectedAsync(
+            "https://sap.example.local/b1s/v1", "SBODEMO_BR", userName, "secret", "dev-user", new("dev-user", "dev-secret")));
         Assert.False(fixture.Initializer.Initialized);
         Assert.Null(fixture.Accessor.SessionKey);
         Assert.False(fixture.Store.TryGet(fixture.Client.Session.SessionKey, out _));
@@ -77,7 +53,7 @@ public sealed class AuthServiceAuthorizationTests
     private sealed class TestLicenseService(bool reject) : ILicenseService
     {
         public Task LogRequestAsync(SapSessionContext session, string message, CancellationToken cancellationToken = default) => Task.CompletedTask;
-        public Task ValidateAsync(SapSessionContext session, CancellationToken cancellationToken = default) =>
+        public Task ValidateAsync(SapSessionContext session, DevHubLicenseCredentials credentials, CancellationToken cancellationToken = default) =>
             reject ? Task.FromException(new LicenseValidationException("Licença não encontrada.")) : Task.CompletedTask;
     }
     private static TestFixture CreateFixture(bool rejectLicense = false)
@@ -94,25 +70,10 @@ public sealed class AuthServiceAuthorizationTests
             SecretKey = "test-only-secret-key-with-at-least-thirty-two-characters",
             ExpirationMinutes = 60
         });
-        var sapOptions = Microsoft.Extensions.Options.Options.Create(new SapServiceLayerOptions
-        {
-            BaseUrl = "https://sap.example.local:50000/b1s/v1",
-            RequestTimeoutSeconds = 30,
-            Bases =
-            [
-                new SapBaseOptions
-                {
-                    Database = "SBODEMO_BR",
-                    Description = "Base de demonstração"
-                }
-            ]
-        });
-
         var service = new AuthService(
             initializer,
             jwtOptions,
             NullLogger<AuthService>.Instance,
-            sapOptions,
             client,
             accessor,
             store,
@@ -163,6 +124,7 @@ public sealed class AuthServiceAuthorizationTests
         };
 
         public Task<SapSessionContext> LoginAsync(
+            string serviceLayerUrl,
             string database,
             string userName,
             string password,

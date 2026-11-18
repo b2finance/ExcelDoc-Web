@@ -1,5 +1,3 @@
-using ExcelDoc.Server.DTOs.Auth;
-using ExcelDoc.Server.Services;
 using ExcelDoc.Server.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,29 +15,6 @@ public sealed class AuthController : ControllerBase
         _authService = authService;
     }
 
-    [AllowAnonymous]
-    [NonAction]
-    public ActionResult<IReadOnlyCollection<SapBaseDto>> GetBases()
-    {
-        return Ok(_authService.GetBases());
-    }
-
-    [AllowAnonymous]
-    [NonAction]
-    public async Task<IActionResult> Login(
-        [FromBody] LoginRequestDto request,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            return Ok(await _authService.LoginAsync(request, cancellationToken));
-        }
-        catch (Exception exception)
-        {
-            return ToActionResult(exception);
-        }
-    }
-
     [Authorize]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
@@ -53,38 +28,5 @@ public sealed class AuthController : ControllerBase
         {
             return NoContent();
         }
-    }
-
-    private ObjectResult ToActionResult(Exception exception)
-    {
-        return exception switch
-        {
-            LicenseValidationException license => StatusCode(
-                license.Unavailable ? StatusCodes.Status503ServiceUnavailable : StatusCodes.Status403Forbidden,
-                new ProblemDetails
-                {
-                    Detail = license.Message,
-                    Status = license.Unavailable ? StatusCodes.Status503ServiceUnavailable : StatusCodes.Status403Forbidden
-                }),
-            UnauthorizedAccessException => Unauthorized(
-                new ProblemDetails
-                {
-                    Detail = exception.Message,
-                    Status = StatusCodes.Status401Unauthorized
-                }),
-            InvalidOperationException => BadRequest(
-                new ProblemDetails
-                {
-                    Detail = exception.Message,
-                    Status = StatusCodes.Status400BadRequest
-                }),
-            _ => StatusCode(
-                StatusCodes.Status500InternalServerError,
-                new ProblemDetails
-                {
-                    Detail = exception.Message,
-                    Status = StatusCodes.Status500InternalServerError
-                })
-        };
     }
 }

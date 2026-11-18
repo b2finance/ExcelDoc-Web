@@ -13,7 +13,7 @@ namespace ExcelDoc.Server.Tests;
 public sealed class DevHubAuthenticationTests
 {
     [Fact]
-    public async Task LoginReturnsOnlyActiveAuthorizedPartnersAndUsesBearerToken()
+    public async Task LoginUsesConfiguredProductAndBearerToken()
     {
         var handler = new DevHubHandler();
         var service = CreateService(handler);
@@ -44,7 +44,7 @@ public sealed class DevHubAuthenticationTests
         await service.SelectAsync(login.SessionKey, 3, default);
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => service.ConnectAsync(
-            login.SessionKey, 3, 8, "wrong", new FakeAuth { RejectLogin = true }, new FakeAccessor(), default));
+            login.SessionKey, 3, 8, "manual-user", "wrong", new FakeAuth { RejectLogin = true }, new FakeAccessor(), default));
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public sealed class DevHubAuthenticationTests
 
         await Assert.ThrowsAsync<DevHubNotFoundException>(() => service.SelectAsync(login.SessionKey, 3, default));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => service.ConnectAsync(
-            login.SessionKey, 3, 8, "sap-secret", new FakeAuth(), new FakeAccessor(), default));
+            login.SessionKey, 3, 8, "manual-user", "sap-secret", new FakeAuth(), new FakeAccessor(), default));
 
         Assert.Contains("/BusinessPartners/3/databases", handler.Paths);
         Assert.Contains("/ServiceLayerInformations/partner/3", handler.Paths);
@@ -114,13 +114,13 @@ public sealed class DevHubAuthenticationTests
         Assert.Equal(404, problem.Status);
         Assert.Equal(message, problem.Detail);
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => service.ConnectAsync(
-            login.SessionKey, 3, 8, "sap-secret", new FakeAuth(), new FakeAccessor(), default));
+            login.SessionKey, 3, 8, "manual-user", "sap-secret", new FakeAuth(), new FakeAccessor(), default));
     }
 
     [Theory]
     [InlineData("/api/LoginUser")]
     [InlineData("/Users/me")]
-    [InlineData("/BusinessPartners/3")]
+    [InlineData("/BusinessPartners/by-product/7")]
     public async Task LoginReturnsDevHubNotFoundMessage(string failedPath)
     {
         var handler = new DevHubHandler
@@ -188,13 +188,13 @@ public sealed class DevHubAuthenticationTests
         var accessor = new FakeAccessor();
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.ConnectAsync(
-            login.SessionKey, 3, 99, "sap-secret", auth, accessor, default));
-        await service.ConnectAsync(login.SessionKey, 3, 8, "sap-secret", auth, accessor, default);
+            login.SessionKey, 3, 99, "manual-user", "sap-secret", auth, accessor, default));
+        await service.ConnectAsync(login.SessionKey, 3, 8, "manual-user", "sap-secret", auth, accessor, default);
 
         Assert.Single(selection.Databases);
         Assert.Equal("https://sap.example.test/b1s/v1", auth.Url);
         Assert.Equal("BASE3", auth.Database);
-        Assert.Equal("sap-user", auth.UserName);
+        Assert.Equal("manual-user", auth.UserName);
         Assert.Equal("dev-user", auth.DevHubUserName);
     }
 
@@ -208,7 +208,7 @@ public sealed class DevHubAuthenticationTests
         var service = CreateService(new DevHubHandler(), store);
         var login = await service.LoginAsync("dev-user", "secret", default);
         await service.SelectAsync(login.SessionKey, 3, default);
-        await service.ConnectAsync(login.SessionKey, 3, 8, "sap-secret", new FakeAuth(), new FakeAccessor(), default);
+        await service.ConnectAsync(login.SessionKey, 3, 8, "manual-user", "sap-secret", new FakeAuth(), new FakeAccessor(), default);
 
         await service.SelectAsync(login.SessionKey, 3, default);
 
@@ -217,9 +217,34 @@ public sealed class DevHubAuthenticationTests
         Assert.Same(oldSession, store.ReleaseJob(oldSession.SessionKey));
     }
 
+    [Theory]
+    [InlineData(false, 403)]
+    [InlineData(true, 503)]
+    public async Task LoginReturnsLicenseMessageForDisplay(bool unavailable, int status)
+    {
+        var service = CreateService(new DevHubHandler());
+        var login = await service.LoginAsync("dev-user", "secret", default);
+        await service.SelectAsync(login.SessionKey, 3, default);
+        var auth = new FakeAuth { LicenseFailure = new LicenseValidationException("Licença indisponível.", unavailable) };
+        var controller = new DevHubAuthController(service, auth, new FakeAccessor())
+        {
+            ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
+        };
+        controller.Request.Headers["X-DevHub-Session"] = login.SessionKey;
+        var result = Assert.IsType<ObjectResult>(await controller.Connect(new DevHubConnectRequest
+        {
+            PartnerId = 3, DatabaseId = 8, SapUserName = "manual-user", Password = "sap-secret"
+        }, default));
+        Assert.Equal(status, result.StatusCode);
+        var problem = Assert.IsType<ProblemDetails>(result.Value);
+        Assert.Equal(status, problem.Status);
+        Assert.Equal("Licença indisponível.", problem.Detail);
+    }
+
     private static DevHubAuthenticationService CreateService(DevHubHandler handler, SapSessionStore? store = null)
     {
-        return new DevHubAuthenticationService(new FakeClientFactory(handler), store ?? new SapSessionStore(), new FakeSapClient());
+        return new DevHubAuthenticationService(new FakeClientFactory(handler), store ?? new SapSessionStore(), new FakeSapClient(),
+            Microsoft.Extensions.Options.Options.Create(new ExcelDoc.Server.Options.LicenseOptions { ProductId = "7" }));
     }
 
     private sealed class FakeClientFactory(HttpMessageHandler handler) : IHttpClientFactory
@@ -273,8 +298,7 @@ public sealed class DevHubAuthenticationTests
             {
                 "/api/LoginUser" => $"{{\"token\":{{\"token\":\"dev-token\",\"expiration\":\"{(ExpiredToken ? "2000" : "2099")}-01-01T00:00:00Z\"}}}}",
                 "/Users/me" => "{\"username\":\"dev-user\",\"isActive\":true,\"businessPartnerIds\":[3,4]}",
-                "/BusinessPartners/3" => "{\"partnerId\":3,\"partnerName\":\"Ativo\",\"active\":true}",
-                "/BusinessPartners/4" => "{\"partnerId\":4,\"partnerName\":\"Inativo\",\"active\":false}",
+                "/BusinessPartners/by-product/7" => "[{\"partnerId\":3,\"partnerName\":\"Ativo\"}]",
                 "/BusinessPartners/3/databases" => $"[{{\"id\":8,\"nomeBase\":\"BASE3\",\"partnerId\":{(WrongDatabase ? 4 : 3)}}}]",
                 "/ServiceLayerInformations/partner/3" => $"{{\"url\":\"https://sap.example.test/b1s/v1\",\"userName\":\"sap-user\",\"partnerId\":{(WrongServiceLayer ? 4 : 3)},\"partnerName\":\"Ativo\"}}",
                 _ => throw new InvalidOperationException("Unexpected endpoint")
@@ -288,18 +312,18 @@ public sealed class DevHubAuthenticationTests
 
     private sealed class FakeAuth : IAuthService
     {
+        public LicenseValidationException? LicenseFailure { get; init; }
         public bool RejectLogin { get; init; }
         public string? Url { get; private set; }
         public string? Database { get; private set; }
         public string? UserName { get; private set; }
         public string? DevHubUserName { get; private set; }
-        public IReadOnlyCollection<SapBaseDto> GetBases() => [];
-        public Task<LoginResponseDto> LoginAsync(LoginRequestDto request, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task LogoutAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         public Task<LoginResponseDto> LoginSelectedAsync(string serviceLayerUrl, string database, string sapUserName,
-            string password, string devHubUserName, CancellationToken cancellationToken = default)
+            string password, string devHubUserName, DevHubLicenseCredentials credentials, CancellationToken cancellationToken = default)
         {
+            if (LicenseFailure is not null) throw LicenseFailure;
             if (RejectLogin)
             {
                 throw new UnauthorizedAccessException("Credenciais SAP inválidas.");
@@ -323,7 +347,7 @@ public sealed class DevHubAuthenticationTests
 
     private sealed class FakeSapClient : ISapServiceLayerClient
     {
-        public Task<SapSessionContext> LoginAsync(string database, string userName, string password, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<SapSessionContext> LoginAsync(string serviceLayerUrl, string database, string userName, string password, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task LogoutAsync(SapSessionContext session, CancellationToken cancellationToken = default) => Task.CompletedTask;
         public Task<bool> IsSuperuserAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<string> GetInstallationNumberAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();

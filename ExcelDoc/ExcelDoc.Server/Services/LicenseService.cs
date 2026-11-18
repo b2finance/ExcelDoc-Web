@@ -13,24 +13,20 @@ public sealed class LicenseService(
     IOptions<LicenseOptions> options,
     ISapServiceLayerClient sapClient,
     ISystemClock clock,
-    ILogger<LicenseService> logger) : ILicenseService, IDisposable
+    ILogger<LicenseService> logger) : ILicenseService
 {
-    public const string ClientName = "DevHub";
-    private readonly SemaphoreSlim _tokenLock = new(1, 1);
-    private string? _token;
-    private DateTimeOffset _tokenExpiration;
-
-    public async Task ValidateAsync(SapSessionContext session, CancellationToken cancellationToken = default)
+    public async Task ValidateAsync(SapSessionContext session, DevHubLicenseCredentials credentials, CancellationToken cancellationToken = default)
     {
         session.License = null;
 
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var config = options.Value;            config.ProductId = "13";
+            var config = options.Value;
+
             if (string.IsNullOrWhiteSpace(config.ProductId) ||
-                string.IsNullOrWhiteSpace(config.UserName) ||
-                string.IsNullOrWhiteSpace(config.Password))
+                string.IsNullOrWhiteSpace(credentials.UserName) ||
+                string.IsNullOrWhiteSpace(credentials.Password))
             {
                 throw new InvalidOperationException("Configuração de licenciamento incompleta.");
             }
@@ -39,8 +35,8 @@ public sealed class LicenseService(
             if (string.IsNullOrWhiteSpace(installation))
                 throw new InvalidOperationException("Número de instalação SAP ausente.");
 
-            using var client = httpClientFactory.CreateClient(ClientName);
-            var partner = await GetAsync<BusinessPartner>(client,
+            using var client = httpClientFactory.CreateClient(DevHubAuthenticationService.ClientName);
+            var partner = await GetAsync<BusinessPartner>(client, credentials,
                 $"BusinessPartners/installation-number/{Uri.EscapeDataString(installation)}", cancellationToken);
 
             if (partner is null)
@@ -49,7 +45,7 @@ public sealed class LicenseService(
             if (partner.PartnerId <= 0 || string.IsNullOrWhiteSpace(partner.HardwareKey))
                 throw new JsonException("Parceiro inválido.");
 
-            var license = await GetAsync<ProductLicense>(client,
+            var license = await GetAsync<ProductLicense>(client, credentials,
                 $"licenses/search?partnerId={partner.PartnerId}&hardwareKey={Uri.EscapeDataString(partner.HardwareKey)}&productId={Uri.EscapeDataString(config.ProductId)}",
                 cancellationToken);
 
@@ -62,7 +58,7 @@ public sealed class LicenseService(
             if (string.IsNullOrWhiteSpace(license.Serial))
                 throw new JsonException("Serial de licença ausente.");
             
-            session.License = new SapLicenseContext(partner.PartnerId, license.Serial);
+            session.License = new SapLicenseContext(partner.PartnerId, license.Serial, credentials);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { throw; }
         catch (LicenseValidationException)
@@ -86,8 +82,8 @@ public sealed class LicenseService(
         if (license is null || license.PartnerId <= 0 || string.IsNullOrWhiteSpace(license.LicenseSerial))
             throw new InvalidOperationException("Valide a licença da sessão antes de enviar logs.");
 
-        using var client = httpClientFactory.CreateClient(ClientName);
-        var token = await GetTokenAsync(client, cancellationToken);
+        using var client = httpClientFactory.CreateClient(DevHubAuthenticationService.ClientName);
+        var token = await GetTokenAsync(client, license.Credentials, cancellationToken);
         using var request = new HttpRequestMessage(HttpMethod.Post, "logs");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         
@@ -107,26 +103,26 @@ public sealed class LicenseService(
     private static LicenseValidationException NotFound() =>
         new("Licença não encontrada para este cliente. Entre em contato com o suporte.");
 
-    private async Task<T?> GetAsync<T>(HttpClient client, string endpoint, CancellationToken ct)
+    private async Task<T?> GetAsync<T>(HttpClient client, DevHubLicenseCredentials credentials, string endpoint, CancellationToken ct)
     {
         for (var attempt = 0; attempt < 2; attempt++)
         {
-            var token = await GetTokenAsync(client, ct);
+            var token = await GetTokenAsync(client, credentials, ct);
             using var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
             using var response = await client.SendAsync(request, ct);
 
             if (response.StatusCode == HttpStatusCode.Unauthorized && attempt == 0)
             {
-                await _tokenLock.WaitAsync(ct);
+                await credentials.TokenLock.WaitAsync(ct);
                 try
                 {
-                    if (_token == token)
-                        _token = null;
+                    if (credentials.Token == token)
+                        credentials.Token = null;
                 }
                 finally
                 {
-                    _tokenLock.Release();
+                    credentials.TokenLock.Release();
                 }
 
                 continue;
@@ -141,19 +137,19 @@ public sealed class LicenseService(
         throw new HttpRequestException("Autenticação da API de licenças recusada.");
     }
 
-    private async Task<string> GetTokenAsync(HttpClient client, CancellationToken ct)
+    private async Task<string> GetTokenAsync(HttpClient client, DevHubLicenseCredentials credentials, CancellationToken ct)
     {
-        await _tokenLock.WaitAsync(ct);
+        await credentials.TokenLock.WaitAsync(ct);
         try
         {
-            if (!string.IsNullOrWhiteSpace(_token) &&
-                new DateTimeOffset(clock.UtcNow) < _tokenExpiration.AddSeconds(-30))
-                return _token;
+            if (!string.IsNullOrWhiteSpace(credentials.Token) &&
+                new DateTimeOffset(clock.UtcNow) < credentials.TokenExpiration.AddSeconds(-30))
+                return credentials.Token;
 
             using var response = await client.PostAsJsonAsync("api/LoginUser", new
             {
-                options.Value.UserName,
-                options.Value.Password
+                credentials.UserName,
+                credentials.Password
             }, ct);
 
             response.EnsureSuccessStatusCode();
@@ -163,18 +159,16 @@ public sealed class LicenseService(
                 login.Token.Expiration <= new DateTimeOffset(clock.UtcNow))
                 throw new JsonException("Token de licenciamento inválido.");
 
-            _token = login.Token.Token;
-            _tokenExpiration = login.Token.Expiration;
+            credentials.Token = login.Token.Token;
+            credentials.TokenExpiration = login.Token.Expiration;
 
-            return _token;
+            return credentials.Token;
         }
-        finally { _tokenLock.Release(); }
+        finally { credentials.TokenLock.Release(); }
     }
 
     private sealed record BusinessPartner(int PartnerId, string HardwareKey);
     private sealed record ProductLicense(bool Active, DateTimeOffset DueDate, string? Serial);
     private sealed record LoginResponse(ApiToken? Token);
     private sealed record ApiToken(string Token, DateTimeOffset Expiration);
-
-    public void Dispose() => _tokenLock.Dispose();
 }

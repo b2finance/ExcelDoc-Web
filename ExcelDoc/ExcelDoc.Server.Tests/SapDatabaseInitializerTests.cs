@@ -15,7 +15,7 @@ public sealed class SapDatabaseInitializerTests
         public int Checks { get; private set; }
         public Task<bool> IsSuperuserAsync(SapSessionContext session, CancellationToken cancellationToken = default) { Checks++; return Task.FromResult(isSuperuser); }
         public Task<string> GetInstallationNumberAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();
-        public Task<SapSessionContext> LoginAsync(string database, string userName, string password, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<SapSessionContext> LoginAsync(string serviceLayerUrl, string database, string userName, string password, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task LogoutAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<string> PostProcessamentoAsync(SapSessionContext session, string endpoint, object payload, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<IReadOnlyDictionary<string, int>> GetNFModelsAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();

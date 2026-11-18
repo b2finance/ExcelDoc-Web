@@ -70,7 +70,13 @@
                 <mat-option *ngFor="let base of selected.databases" [value]="base.id">{{ base.nomeBase }}</mat-option>
               </mat-select>
             </mat-form-field>
-            <p class="login-sap-user">Usuário SAP: {{ selected.serviceLayer.userName }}</p>
+            <div class="login-field">
+              <label for="sapUserName">Usuário SAP <span aria-hidden="true">*</span></label>
+              <div class="login-field__input">
+                <mat-icon aria-hidden="true">person_outline</mat-icon>
+                <input id="sapUserName" name="sapUserName" [(ngModel)]="sapUserName" autocomplete="off" required>
+              </div>
+            </div>
             <div class="login-field">
               <label for="sapPassword">Senha SAP <span aria-hidden="true">*</span></label>
               <div class="login-field__input">

@@ -9,6 +9,8 @@ namespace ExcelDoc.Server.Tests;
 
 public sealed class LicenseServiceTests
 {
+    private readonly DevHubLicenseCredentials _credentials = new("dev-user", "dev-secret");
+
     [Theory]
     [InlineData("{\"serial\":\"license-42\",\"active\":true,\"dueDate\":\"2099-01-01T00:00:00Z\"}", true)]
     [InlineData("{\"serial\":\"license-42\",\"active\":false,\"dueDate\":\"2099-01-01T00:00:00Z\"}", false)]
@@ -18,9 +20,9 @@ public sealed class LicenseServiceTests
     public async Task ValidatesActiveAndUnexpiredLicense(string body, bool allowed)
     {
         using var handler = new ApiHandler { LicenseBody = body };
-        using var service = CreateService(handler);
-        if (allowed) await service.ValidateAsync(new SapSessionContext());
-        else await Assert.ThrowsAsync<LicenseValidationException>(() => service.ValidateAsync(new SapSessionContext()));
+        var service = CreateService(handler);
+        if (allowed) await service.ValidateAsync(new SapSessionContext(), _credentials);
+        else await Assert.ThrowsAsync<LicenseValidationException>(() => service.ValidateAsync(new SapSessionContext(), _credentials));
         Assert.Contains("productId=7", handler.LastSearch);
         Assert.Contains("hardwareKey=key%26value", handler.LastSearch);
     }
@@ -31,8 +33,8 @@ public sealed class LicenseServiceTests
     public async Task RejectsMissingPartnerAndApiFailure(int status, bool unavailable)
     {
         using var handler = new ApiHandler { PartnerStatus = (HttpStatusCode)status };
-        using var service = CreateService(handler);
-        var error = await Assert.ThrowsAsync<LicenseValidationException>(() => service.ValidateAsync(new SapSessionContext()));
+        var service = CreateService(handler);
+        var error = await Assert.ThrowsAsync<LicenseValidationException>(() => service.ValidateAsync(new SapSessionContext(), _credentials));
         Assert.Equal(unavailable, error.Unavailable);
         Assert.Null(handler.LastSearch);
     }
@@ -41,8 +43,8 @@ public sealed class LicenseServiceTests
     public async Task CachesTokenButChecksLicenseEveryLogin()
     {
         using var handler = new ApiHandler();
-        using var service = CreateService(handler);
-        await Task.WhenAll(Enumerable.Range(0, 10).Select(_ => service.ValidateAsync(new SapSessionContext())));
+        var service = CreateService(handler);
+        await Task.WhenAll(Enumerable.Range(0, 10).Select(_ => service.ValidateAsync(new SapSessionContext(), _credentials)));
         Assert.Equal(1, handler.Logins);
         Assert.Equal(10, handler.Searches);
     }
@@ -51,8 +53,8 @@ public sealed class LicenseServiceTests
     public async Task RetriesOnceWithNewTokenAfterUnauthorized()
     {
         using var handler = new ApiHandler { RejectTokenOnce = true };
-        using var service = CreateService(handler);
-        await service.ValidateAsync(new SapSessionContext());
+        var service = CreateService(handler);
+        await service.ValidateAsync(new SapSessionContext(), _credentials);
         Assert.Equal(2, handler.Logins);
     }
 
@@ -60,10 +62,10 @@ public sealed class LicenseServiceTests
     public async Task PreservesCancellation()
     {
         using var handler = new ApiHandler();
-        using var service = CreateService(handler);
+        var service = CreateService(handler);
         using var cts = new CancellationTokenSource();
         cts.Cancel();
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => service.ValidateAsync(new SapSessionContext(), cts.Token));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => service.ValidateAsync(new SapSessionContext(), _credentials, cts.Token));
     }
 
     [Theory]
@@ -73,8 +75,8 @@ public sealed class LicenseServiceTests
     public async Task RejectsInvalidApiToken(string loginBody)
     {
         using var handler = new ApiHandler { LoginBody = loginBody };
-        using var service = CreateService(handler);
-        var error = await Assert.ThrowsAsync<LicenseValidationException>(() => service.ValidateAsync(new SapSessionContext()));
+        var service = CreateService(handler);
+        var error = await Assert.ThrowsAsync<LicenseValidationException>(() => service.ValidateAsync(new SapSessionContext(), _credentials));
         Assert.True(error.Unavailable);
         Assert.Equal(0, handler.Searches);
     }
@@ -83,10 +85,10 @@ public sealed class LicenseServiceTests
     public async Task MissingConfigurationBlocksBeforeHttpCalls()
     {
         using var handler = new ApiHandler();
-        using var service = new LicenseService(new ClientFactory(handler),
+        var service = new LicenseService(new ClientFactory(handler),
             Microsoft.Extensions.Options.Options.Create(new LicenseOptions()),
             new SapClient(), new Clock(), NullLogger<LicenseService>.Instance);
-        var error = await Assert.ThrowsAsync<LicenseValidationException>(() => service.ValidateAsync(new SapSessionContext()));
+        var error = await Assert.ThrowsAsync<LicenseValidationException>(() => service.ValidateAsync(new SapSessionContext(), _credentials));
         Assert.True(error.Unavailable);
         Assert.Equal(0, handler.Logins);
     }
@@ -94,13 +96,13 @@ public sealed class LicenseServiceTests
     public async Task LogsUseValidatedSessionAndIncludeTrace()
     {
         using var handler = new ApiHandler();
-        using var service = CreateService(handler);
+        var service = CreateService(handler);
         var first = new SapSessionContext();
-        await service.ValidateAsync(first);
+        await service.ValidateAsync(first, _credentials);
         handler.LicenseBody = "{\"serial\":\"second-license\",\"active\":true,\"dueDate\":\"2099-01-01T00:00:00Z\"}";
         handler.PartnerBody = "{\"partnerId\":99,\"hardwareKey\":\"other-key\"}";
         var second = new SapSessionContext();
-        await service.ValidateAsync(second);
+        await service.ValidateAsync(second, _credentials);
         await service.LogRequestAsync(first, "Documento inserido.");
         await service.LogRequestAsync(second, "Outro documento.");
         using var log = System.Text.Json.JsonDocument.Parse(handler.Logs[0]);
@@ -119,7 +121,7 @@ public sealed class LicenseServiceTests
     public async Task CannotLogWithoutValidatedSession()
     {
         using var handler = new ApiHandler();
-        using var service = CreateService(handler);
+        var service = CreateService(handler);
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.LogRequestAsync(new SapSessionContext(), "message"));
         Assert.Empty(handler.Logs);
         Assert.Equal(0, handler.Logins);
@@ -129,9 +131,9 @@ public sealed class LicenseServiceTests
     public async Task FailedLogIsNotRetried()
     {
         using var handler = new ApiHandler { LogStatus = HttpStatusCode.InternalServerError };
-        using var service = CreateService(handler);
+        var service = CreateService(handler);
         var session = new SapSessionContext();
-        await service.ValidateAsync(session);
+        await service.ValidateAsync(session, _credentials);
         await Assert.ThrowsAsync<HttpRequestException>(() => service.LogRequestAsync(session, "message"));
         Assert.Single(handler.Logs);
     }
@@ -140,14 +142,14 @@ public sealed class LicenseServiceTests
     public async Task MissingSerialCannotEstablishLicenseContext()
     {
         using var handler = new ApiHandler { LicenseBody = "{\"active\":true,\"dueDate\":\"2099-01-01T00:00:00Z\"}" };
-        using var service = CreateService(handler);
+        var service = CreateService(handler);
         var session = new SapSessionContext();
-        await Assert.ThrowsAsync<LicenseValidationException>(() => service.ValidateAsync(session));
+        await Assert.ThrowsAsync<LicenseValidationException>(() => service.ValidateAsync(session, _credentials));
         Assert.Null(session.License);
     }
     private static LicenseService CreateService(ApiHandler handler) => new(
         new ClientFactory(handler),
-        Microsoft.Extensions.Options.Options.Create(new LicenseOptions { ProductId = "7", UserName = "test", Password = "test" }),
+        Microsoft.Extensions.Options.Options.Create(new LicenseOptions { ProductId = "7" }),
         new SapClient(), new Clock(), NullLogger<LicenseService>.Instance);
 
     private sealed class Clock : ISystemClock
@@ -178,6 +180,9 @@ public sealed class LicenseServiceTests
             var path = request.RequestUri!.AbsolutePath;
             if (path == "/api/LoginUser")
             {
+                using var payload = System.Text.Json.JsonDocument.Parse(request.Content!.ReadAsStringAsync(cancellationToken).GetAwaiter().GetResult());
+                Assert.Equal("dev-user", payload.RootElement.GetProperty("userName").GetString());
+                Assert.Equal("dev-secret", payload.RootElement.GetProperty("password").GetString());
                 Interlocked.Increment(ref Logins);
                 return Reply(HttpStatusCode.OK, LoginBody);
             }
@@ -212,7 +217,7 @@ public sealed class LicenseServiceTests
             cancellationToken.ThrowIfCancellationRequested();
             return Task.FromResult("installation");
         }
-        public Task<SapSessionContext> LoginAsync(string database, string userName, string password, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<SapSessionContext> LoginAsync(string serviceLayerUrl, string database, string userName, string password, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task LogoutAsync(SapSessionContext session, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<string> PostProcessamentoAsync(SapSessionContext session, string endpoint, object payload, CancellationToken cancellationToken = default) => throw new NotSupportedException();
     }

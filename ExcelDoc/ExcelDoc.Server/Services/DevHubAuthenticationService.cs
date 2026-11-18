@@ -5,8 +5,10 @@ using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text.Json;
 using ExcelDoc.Server.DTOs.Auth;
+using ExcelDoc.Server.Options;
 using ExcelDoc.Server.Sap;
 using ExcelDoc.Server.Services.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace ExcelDoc.Server.Services;
 
@@ -18,15 +20,18 @@ public sealed class DevHubAuthenticationService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ISapSessionStore _sapSessions;
     private readonly ISapServiceLayerClient _sapClient;
+    private readonly LicenseOptions _licenseOptions;
 
     public DevHubAuthenticationService(
         IHttpClientFactory httpClientFactory,
         ISapSessionStore sapSessions,
-        ISapServiceLayerClient sapClient)
+        ISapServiceLayerClient sapClient,
+        IOptions<LicenseOptions> licenseOptions)
     {
         _httpClientFactory = httpClientFactory;
         _sapSessions = sapSessions;
         _sapClient = sapClient;
+        _licenseOptions = licenseOptions.Value;
     }
 
     public async Task<DevHubLoginResult> LoginAsync(string userName, string password, CancellationToken cancellationToken)
@@ -52,20 +57,7 @@ public sealed class DevHubAuthenticationService
             throw new UnauthorizedAccessException("Usuário DevHub inativo ou sem clientes autorizados.");
         }
 
-        var partners = new List<DevHubPartner>();
-        foreach (var id in profile.BusinessPartnerIds.Distinct())
-        {
-            var partner = await GetAsync<DevHubPartner>(client, $"BusinessPartners/{id}", cancellationToken);
-            if (partner.PartnerId != id)
-            {
-                throw new InvalidOperationException("O DevHub retornou dados inconsistentes do cliente.");
-            }
-
-            if (partner.Active && !string.IsNullOrWhiteSpace(partner.PartnerName))
-            {
-                partners.Add(partner);
-            }
-        }
+        var partners = await GetAsync<List<DevHubPartner>>(client, $"BusinessPartners/by-product/{Uri.EscapeDataString(_licenseOptions.ProductId)}", cancellationToken);
 
         if (partners.Count == 0)
         {
@@ -96,7 +88,12 @@ public sealed class DevHubAuthenticationService
         }
 
         var key = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
-        var session = new DevHubSession(login.Token.Token, login.Token.Expiration, profile.Username, partners, profile.Menus);
+        var credentials = new DevHubLicenseCredentials(userName, password)
+        {
+            Token = login.Token.Token,
+            TokenExpiration = login.Token.Expiration
+        };
+        var session = new DevHubSession(login.Token.Token, login.Token.Expiration, profile.Username, credentials, partners, profile.Menus);
         _sessions[key] = session;
         return new DevHubLoginResult(key, partners);
     }
@@ -123,7 +120,7 @@ public sealed class DevHubAuthenticationService
             var databases = await databasesTask;
             var serviceLayer = await serviceLayerTask;
             if (databases.Any(item => item.PartnerId != partnerId || string.IsNullOrWhiteSpace(item.NomeBase)) ||
-                serviceLayer.PartnerId != partnerId || string.IsNullOrWhiteSpace(serviceLayer.UserName) ||
+                serviceLayer.PartnerId != partnerId ||
                 !Uri.TryCreate(serviceLayer.Url, UriKind.Absolute, out var url) ||
                 url.Scheme != Uri.UriSchemeHttps || !string.IsNullOrEmpty(url.UserInfo))
             {
@@ -143,7 +140,7 @@ public sealed class DevHubAuthenticationService
     }
 
     public async Task<LoginResponseDto> ConnectAsync(
-        string key, int partnerId, int databaseId, string password,
+        string key, int partnerId, int databaseId, string sapUserName, string password,
         IAuthService authService, ISapSessionContextAccessor accessor, CancellationToken cancellationToken)
     {
         var session = GetSession(key);
@@ -160,15 +157,15 @@ public sealed class DevHubAuthenticationService
 
             var selection = session.Selection;
             var matches = selection.Databases.Where(item => item.Id == databaseId && item.PartnerId == partnerId).ToList();
-            if (matches.Count != 1 || string.IsNullOrWhiteSpace(password))
+            if (matches.Count != 1 || string.IsNullOrWhiteSpace(sapUserName) || string.IsNullOrWhiteSpace(password))
             {
-                throw new InvalidOperationException("Selecione uma base autorizada e informe a senha SAP.");
+                throw new InvalidOperationException("Selecione uma base autorizada e informe o usuário e a senha SAP.");
             }
 
             await InvalidateSapAsync(session);
             var result = await authService.LoginSelectedAsync(
-                selection.ServiceLayer.Url, matches[0].NomeBase, selection.ServiceLayer.UserName,
-                password, session.UserName, cancellationToken);
+                selection.ServiceLayer.Url, matches[0].NomeBase, sapUserName.Trim(),
+                password, session.UserName, session.Credentials, cancellationToken);
             session.SapSessionKey = accessor.GetRequiredSessionKey();
             return result;
         }
@@ -312,8 +309,9 @@ public sealed class DevHubAuthenticationService
     }
 
     private sealed class DevHubSession(
-        string token, DateTimeOffset expiresAt, string userName, List<DevHubPartner> partners, JsonElement menus)
+        string token, DateTimeOffset expiresAt, string userName, DevHubLicenseCredentials credentials, List<DevHubPartner> partners, JsonElement menus)
     {
+        public DevHubLicenseCredentials Credentials { get; } = credentials;
         public string Token { get; } = token;
         public DateTimeOffset ExpiresAt { get; } = expiresAt;
         public string UserName { get; } = userName;
@@ -330,8 +328,8 @@ public sealed class DevHubAuthenticationService
     private sealed record DevHubProfile(string Username, bool IsActive, List<int>? BusinessPartnerIds, JsonElement Menus);
 }
 
-public sealed record DevHubPartner(int PartnerId, string PartnerName, bool Active);
+public sealed record DevHubPartner(int PartnerId, string PartnerName);
 public sealed record DevHubDatabase(int Id, string NomeBase, int PartnerId);
-public sealed record DevHubServiceLayer(string Url, string UserName, int PartnerId, string PartnerName);
+public sealed record DevHubServiceLayer(string Url, int PartnerId, string PartnerName);
 public sealed record DevHubSelection(int PartnerId, List<DevHubDatabase> Databases, DevHubServiceLayer ServiceLayer);
 public sealed record DevHubLoginResult(string SessionKey, List<DevHubPartner> Partners);

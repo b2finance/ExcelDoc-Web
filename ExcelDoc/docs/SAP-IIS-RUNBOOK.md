@@ -28,7 +28,7 @@ Referências:
 
 ## 2. Configurar a instalação
 
-Configure `DevHub:BaseUrl` apenas quando necessário para outro ambiente HTTPS. As bases, o usuário SAP e a URL da Service Layer são obtidos do DevHub para o cliente autorizado. Configure `SapServiceLayer:RequestTimeoutSeconds` e `SapServiceLayer:Language` conforme a instalação.
+Configure `DevHub:BaseUrl` apenas quando necessário para outro ambiente HTTPS. O DevHub fornece as bases e a URL da Service Layer para o cliente autorizado. O usuário informa suas credenciais SAP ao conectar. Configure o produto em `Licensing:ProductId`. Configure `SapServiceLayer:RequestTimeoutSeconds` e `SapServiceLayer:Language` conforme a instalação.
 
 Não adicione:
 
